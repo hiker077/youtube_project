@@ -2,40 +2,48 @@
 import requests
 import json
 
-def get_video_list(url, api_key, maxResults, channel_id, dowload_limit=None):
+
+def fetch_videos(url, channel_id, api_key, max_results, video_duration, page_token= None):
+    """Can be long or medium"""
+
+    params = {'part': 'snippet', 'type':'video','videoDuration': video_duration, 'channelId': channel_id, 'key': api_key, 'maxResults': max_results, 'pageToken': page_token}
+    response = requests.get(url, params=params)
+    # response.raise_for_status()
+    return response.json()
+
+
+def get_video_list(url, api_key, maxResults, channel_id, video_duration, dowload_limit=None):
     """"
     This function upload entire list of videoID's for defined channel_id. 
     Return the list. 
     """
     
     videos_list = []
+    page_token = None
 
     try:
         ##temp litmit of dowloads
         count = 0
         while True:
             
-            params = {'part': 'snippet', 'channelId': channel_id, 'key': api_key, 'maxResults': maxResults}
-            response = requests.get(url, params=params)
-            response_json = response.json()
+            response_json= fetch_videos(url, channel_id, api_key, maxResults, video_duration, page_token)
 
-            if response.status_code != 200:
-                raise Exception(f"Error fetching videos: {response.status_code} - {response_json.get('error', {}).get('message')}")
+            # if response.status_code != 200:
+            #     raise Exception(f"Error fetching videos: {response.status_code} - {response_json.get('error', {}).get('message')}")
 
             video_ids = [item['id'].get('videoId') for item in response_json.get('items', []) if item['id'].get('videoId')]
             videos_list.extend(video_ids)
             page_token = response_json.get('nextPageToken')
-           # count+=1 
             count = len(videos_list)
+            ##change to logg later 
+            print(f'Number of IDs in list {count} and page_token {page_token}')
 
             if dowload_limit is not None:
                 maxResults =  maxResults if (dowload_limit - count)>= maxResults else (dowload_limit - count)
-
                 if dowload_limit==count:
                     print(count)
                     break 
             elif not page_token:
-                print(page_token)
                 break
 
     except Exception as e:
