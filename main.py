@@ -5,36 +5,34 @@ import pandas as pd
 import json
 
 def main():
-    ##Download list of videoID's
-    ## set up long or medium
+    #Download list of videoID's
+    # set up long or medium
 
-    # print('1. Dowload of video IDs started.')
-    # video_list_long = get_video_list(url =  URL_SEARCH, api_key = API_KEY, maxResults= MAX_RESULTS, channel_id= CHANNEL_ID, video_duration= VIDEO_DURATION_LONG)
-    # video_list_medium = get_video_list(url =  URL_SEARCH, api_key = API_KEY, maxResults= MAX_RESULTS, channel_id= CHANNEL_ID, video_duration= VIDEO_DURATION_MEDIUM)
-    # video_list = video_list_long + video_list_medium
+    print('1. Dowload of video IDs started.')
+    video_list_long = get_video_list(url =  URL_SEARCH, api_key = API_KEY, maxResults= MAX_RESULTS, channel_id= CHANNEL_ID, video_duration= VIDEO_DURATION_LONG)
+    video_list_medium = get_video_list(url =  URL_SEARCH, api_key = API_KEY, maxResults= MAX_RESULTS, channel_id= CHANNEL_ID, video_duration= VIDEO_DURATION_MEDIUM)
+    video_list = video_list_long + video_list_medium
 
-    # print('2. Saving od video IDs list to started.')
-    # with open('data/raw_data/video_list.json', 'w') as file:
-    #     json.dump(video_list, file)
+    print('2. Saving of video IDs list to started.')
+    with open('data/raw_data/video_list.json', 'w') as file:
+        json.dump(video_list, file)
 
-    ##Dowload video statistics
-    ## Adding less URL_VIDEOS, parallel
-       ##dodaj ścieżki do CONFIG 
-
-    # with open('data/raw_data/video_list.json', 'r') as file:
-    #     video_list = json.load(file)
-
-    # video_statistics, category_list = get_video_statistics(url = URL_VIDEOS, channelId = CHANNEL_ID, videoList = video_list, api_key=API_KEY)
-    # with open('data/raw_data/video_statistics_list.json', 'w') as file:
-    #     json.dump(video_statistics, file)
+    #Dowload video statistics
+    # Adding less URL_VIDEOS, parallel
+       #dodaj ścieżki do CONFIG 
+    print('3. Saving of videos statistics list has been started.')
+    video_statistics, category_list = get_video_statistics(url = URL_VIDEOS, channelId = CHANNEL_ID, videoList = video_list, api_key=API_KEY)
+    with open('data/raw_data/video_statistics_list.json', 'w') as file:
+        json.dump(video_statistics, file)
     
 
-    # # #Dowload video categories
-    # video_categories = get_video_categories(url=URL_VIDEO_CATEGORIES, api_key= API_KEY, list_of_id= category_list)
-    # with open('data/raw_data/video_categories.json', 'w') as file:
-    #     json.dump(video_categories, file)
+    # #Dowload video categories
+    print('4. Saving of videos categories list has been started.')
+    video_categories = get_video_categories(url=URL_VIDEO_CATEGORIES, api_key= API_KEY, list_of_id= category_list)
+    with open('data/raw_data/video_categories.json', 'w') as file:
+        json.dump(video_categories, file)
 
-
+    print('4. Saving of dashboard data has been started.')
     youtube_data_dashboard = prepare_and_save_data(path_video_statistics_list =PATH_VIDEO_STATISTICS_LIST, path_videos_categories= PATH_VIDEOS_CATEGORIES)
     youtube_data_dashboard.to_csv(PATH_DASHBOARD_DATA + 'youtube_data_dashboard.csv')
     
