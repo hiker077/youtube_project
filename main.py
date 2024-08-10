@@ -32,11 +32,10 @@ def main():
     with open('data/raw_data/video_categories.json', 'w') as file:
         json.dump(video_categories, file)
 
-    print('4. Saving of dashboard data has been started.')
+    print('5. Saving of dashboard data has been started.')
     youtube_data_dashboard = prepare_and_save_data(path_video_statistics_list =PATH_VIDEO_STATISTICS_LIST, path_videos_categories= PATH_VIDEOS_CATEGORIES)
     youtube_data_dashboard.to_csv(PATH_DASHBOARD_DATA + 'youtube_data_dashboard.csv')
     
-
 
     
 if __name__ == "__main__":
