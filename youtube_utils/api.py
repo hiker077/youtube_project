@@ -65,34 +65,40 @@ def get_video_list(url, api_key, maxResults, channel_id, video_duration, dowload
     return videos_list
 
 
-
-def get_video_statistics(url, channelId, videoList, api_key, part=('snippet', 'contentDetails', 'statistics')):
+def get_video_statistics(url, channelId, videoList, api_key , part=('snippet', 'contentDetails', 'statistics')):
     results = []
     category_list = set()
     """
     This function dowload video statistic for each videoID defined on the input list. 
     """
-
     try:
         for video_id in videoList:
             params = {'part': part, 'id': video_id, 'key': api_key}
             response = requests.get(url, params=params)
             response_json = response.json()
             
+            
             if response.status_code != 200:
                 raise Exception(f"Error fetching videos: {response.status_code} - {response_json.get('error', {}).get('message')}")
             
             if 'items' in response_json:
-                item = response_json['items'][0]['snippet']
-                publishedAt = item['publishedAt']
-                title = item['title']
-                tags = item.get('tags', [])
-                viewCount = response_json['items'][0]['statistics']['viewCount']
-                likeCount = response_json['items'][0]['statistics']['likeCount']
-                commentCount = response_json['items'][0]['statistics']['commentCount']
-                contentDetails = response_json['items'][0]['contentDetails']['duration']
-                categoryId = item['categoryId']
+                
+                item_snippet = response_json['items'][0]['snippet']
+                item_statistic = response_json['items'][0]['statistics']
+                item_content_etails = response_json['items'][0]['contentDetails']
+                item_id = response_json['items'][0]['id']
+                
+                publishedAt = item_snippet.get('publishedAt')
+                title = item_snippet.get('title')
+                tags = item_snippet.get('tags', [])
+                viewCount = item_statistic.get('viewCount')
+                likeCount = item_statistic.get('likeCount')
+                commentCount = item_statistic.get('commentCount')
+                contentDetails = item_content_etails.get('duration')
+                categoryId = item_snippet.get('categoryId')
+
                 results.append({
+                    'videoID': item_id,
                     'publishedAt': publishedAt,
                     'title': title,
                     'tags': tags,
@@ -102,7 +108,8 @@ def get_video_statistics(url, channelId, videoList, api_key, part=('snippet', 'c
                     'contentDetails': contentDetails,
                     'categoryId': categoryId
                 })
-                category_list.add(item['categoryId'])
+
+                category_list.add(item_snippet['categoryId'])
             else:
                 print(f"Error fetching statistics for video {video_id}")
 
