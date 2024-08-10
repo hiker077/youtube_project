@@ -72,7 +72,7 @@ def get_video_statistics(url, channelId, videoList, api_key , part=('snippet', '
     This function dowload video statistic for each videoID defined on the input list. 
     """
     try:
-        for video_id in videoList:
+        for index, video_id in enumerate(videoList):
             params = {'part': part, 'id': video_id, 'key': api_key}
             response = requests.get(url, params=params)
             response_json = response.json()
@@ -110,6 +110,7 @@ def get_video_statistics(url, channelId, videoList, api_key , part=('snippet', '
                 })
 
                 category_list.add(item_snippet['categoryId'])
+                print(f'VideoId: {video_id}. Iteration number: {index}')
             else:
                 print(f"Error fetching statistics for video {video_id}")
 
