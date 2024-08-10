@@ -5,9 +5,12 @@ import json
 
 def main():
     ##Download list of videoID's
-    #usunięto dowload limit 
+    #usunięto dowload limit
+    
+    print('1. Dowload of video IDs started.')
     video_list = get_video_list(url =  URL_SEARCH, api_key = API_KEY, maxResults= MAX_RESULTS, channel_id= CHANNEL_ID, video_duration= 'long')
     
+    print('2. Saving od video IDs list to started.')
     with open('data/raw_data/video_list.json', 'w') as file:
         json.dump(video_list, file)
 
