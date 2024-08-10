@@ -15,7 +15,7 @@ def main():
     #     json.dump(video_list, file)
 
 
-
+    #test
     ##Dowload video statistics
     ## Adding less URL_VIDEOS, parallel
     video_statistics, category_list = get_video_statistics(url = URL_VIDEOS, channelId = CHANNEL_ID, videoList = video_list, api_key=API_KEY)
