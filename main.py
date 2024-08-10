@@ -12,7 +12,7 @@ def main():
     video_list_long = get_video_list(url =  URL_SEARCH, api_key = API_KEY, maxResults= MAX_RESULTS, channel_id= CHANNEL_ID, video_duration= VIDEO_DURATION_LONG)
     video_list_medium = get_video_list(url =  URL_SEARCH, api_key = API_KEY, maxResults= MAX_RESULTS, channel_id= CHANNEL_ID, video_duration= VIDEO_DURATION_MEDIUM)
     video_list = video_list_long + video_list_medium
-
+#DUPPPPA!
     print('2. Saving of video IDs list to started.')
     with open('data/raw_data/video_list.json', 'w') as file:
         json.dump(video_list, file)
