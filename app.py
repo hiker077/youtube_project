@@ -43,6 +43,16 @@ app.layout = dbc.Container([
 
 ], fluid=True)
 
+##missing callback 
+@callback(
+    Output('my-first-graph', 'figure')
+)
+def update_graf():
+    dff = df.groupby(['PUBLISHED_PERIOD']).size().reset_index(name='Count')
+    fig = px.bar(dff, x='PUBLISHED_PERIOD', y='Count')
+    
+    return fig 
+
 ##https://dash-example-index.herokuapp.com/
 
 # insporacja: 
