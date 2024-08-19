@@ -21,6 +21,14 @@ app.layout = dbc.Container([
     dbc.Row([
         dbc.Col([
             html.Div("One of three columns"),
+            html.Div(dcc.RangeSlider(
+                df['VIDEO_TIME'].min(),
+                df['VIDEO_TIME'].max(),
+                step=None,
+                id='crossfilter-year--slider',
+                value=[df['VIDEO_TIME'].min(), df['VIDEO_TIME'].max()],
+                # marks={str(year): str(year) for year in df['VIDEO_TIME'].unique()}
+                )),
             dcc.Graph(id='my-first-graph')
             ], width=6),
         dbc.Col([ 
@@ -45,12 +53,16 @@ app.layout = dbc.Container([
 
 ##missing callback 
 @callback(
-    Output('my-first-graph', 'figure')
+    Output('my-first-graph', 'figure'),
+    Input('crossfilter-year--slider', 'value')
 )
-def update_graf():
-    dff = df.groupby(['PUBLISHED_PERIOD']).size().reset_index(name='Count')
-    fig = px.bar(dff, x='PUBLISHED_PERIOD', y='Count')
-    
+def update_graf(crossfilter_year_slider):
+    # dff = df.groupby(['PUBLISHED_PERIOD']).size().reset_index(name='Count')
+    # fig = px.bar(dff, x='PUBLISHED_PERIOD', y='Count')
+    dff = df[(df['VIDEO_TIME']>= crossfilter_year_slider[0]) & (df['VIDEO_TIME']<= crossfilter_year_slider[1])]
+    dff = dff.groupby(['YEAR_MONTH'])['YEAR_MONTH'].describe()['count'].reset_index().sort_values(by="YEAR_MONTH", ascending=True)
+    fig = px.bar(dff,x= 'YEAR_MONTH', y= 'count')
+
     return fig 
 
 ##https://dash-example-index.herokuapp.com/
