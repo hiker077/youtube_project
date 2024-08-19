@@ -21,49 +21,83 @@ app.layout = dbc.Container([
     dbc.Row([
         dbc.Col([
             html.Div("One of three columns"),
-            html.Div(dcc.RangeSlider(
+            html.Div(
+                dcc.RangeSlider(
                 df['VIDEO_TIME'].min(),
                 df['VIDEO_TIME'].max(),
                 step=None,
                 id='crossfilter-year--slider',
                 value=[df['VIDEO_TIME'].min(), df['VIDEO_TIME'].max()],
                 # marks={str(year): str(year) for year in df['VIDEO_TIME'].unique()}
-                )),
+                )
+            ),
             dcc.Graph(id='my-first-graph')
-            ], width=6),
+        ], width=6),
         dbc.Col([ 
             html.Div("The second of three columns", className="text-center my-3"),
+            html.Div(
+                dcc.Dropdown(
+                    options=["Avg. number of views", "Avg. number of likes", "Number of movies"],
+                    value ="Number of movies",
+                    id = "filter-dropdown"
+                )
+            ),
             dcc.Graph(id='my-second-graph')
-            ], width=6)
+        ], width=6)
     ]),
     dbc.Row([
         dbc.Col([
             html.Div('3 Chart'),
             dcc.Graph(id='my-third-graph')
-            ],width=6),
+        ],width=6),
         dbc.Col([
             html.Div('4 Chart'),
             dcc.Graph(id='my-fourth-graph')
-            ],width=6)
-
-  
+        ],width=6)
     ])
 
 ], fluid=True)
 
-##missing callback 
+##First chart
 @callback(
     Output('my-first-graph', 'figure'),
     Input('crossfilter-year--slider', 'value')
 )
 def update_graf(crossfilter_year_slider):
-    # dff = df.groupby(['PUBLISHED_PERIOD']).size().reset_index(name='Count')
-    # fig = px.bar(dff, x='PUBLISHED_PERIOD', y='Count')
     dff = df[(df['VIDEO_TIME']>= crossfilter_year_slider[0]) & (df['VIDEO_TIME']<= crossfilter_year_slider[1])]
     dff = dff.groupby(['YEAR_MONTH'])['YEAR_MONTH'].describe()['count'].reset_index().sort_values(by="YEAR_MONTH", ascending=True)
     fig = px.bar(dff,x= 'YEAR_MONTH', y= 'count')
 
     return fig 
+
+@callback(
+    Output('my-second-graph', 'figure'),
+    Input('filter-dropdown', 'value')
+)
+def update_second_graph(filter_dropdown):
+    if filter_dropdown== 'Avg. number of views':
+        dff = df.groupby(["CATEGORY_TITLE"]).aggregate({"VIEWCOUNT": 'mean'}).reset_index().sort_values(by="VIEWCOUNT", ascending=False)
+        fig = px.bar(dff,x= 'CATEGORY_TITLE', y= 'VIEWCOUNT')
+    elif filter_dropdown== 'Avg. number of likes':
+        dff = df.groupby(["CATEGORY_TITLE"]).aggregate({"LIKECOUNT": 'mean'}).reset_index().sort_values(by="LIKECOUNT", ascending=False)
+        fig = px.bar(dff,x= 'CATEGORY_TITLE', y= 'LIKECOUNT')
+    elif filter_dropdown== 'Number of movies':
+        dff = df.groupby(['CATEGORY_TITLE'])['CATEGORY_TITLE'].describe()['count'].reset_index().sort_values(by="CATEGORY_TITLE", ascending=True)
+        fig = px.bar(dff,x= 'CATEGORY_TITLE', y= 'count')
+
+    return fig
+
+        
+        
+        
+    
+    # dff = 
+    # df_group = df.groupby(["CATEGORY_TITLE"]).aggregate({"VIEWCOUNT": sum}).reset_index().sort_values(by="VIEWCOUNT", ascending=False)
+    # df_group
+    # px.bar(df_group, x ="CATEGORY_TITLE", y="VIEWCOUNT", )
+
+
+
 
 ##https://dash-example-index.herokuapp.com/
 
