@@ -66,7 +66,7 @@ app.layout = dbc.Container([
 def update_graf(crossfilter_year_slider):
     dff = df[(df['VIDEO_TIME']>= crossfilter_year_slider[0]) & (df['VIDEO_TIME']<= crossfilter_year_slider[1])]
     dff = dff.groupby(['YEAR_MONTH'])['YEAR_MONTH'].describe()['count'].reset_index().sort_values(by="YEAR_MONTH", ascending=True)
-    fig = px.bar(dff,x= 'YEAR_MONTH', y= 'count')
+    fig = px.bar(dff, x= 'YEAR_MONTH', y= 'count')
 
     return fig 
 
@@ -82,12 +82,13 @@ def update_second_graph(filter_dropdown):
         dff = df.groupby(["CATEGORY_TITLE"]).aggregate({"LIKECOUNT": 'mean'}).reset_index().sort_values(by="LIKECOUNT", ascending=False)
         fig = px.bar(dff,x= 'CATEGORY_TITLE', y= 'LIKECOUNT')
     elif filter_dropdown== 'Number of movies':
-        dff = df.groupby(['CATEGORY_TITLE'])['CATEGORY_TITLE'].describe()['count'].reset_index().sort_values(by="CATEGORY_TITLE", ascending=True)
+        dff = df.groupby(['CATEGORY_TITLE'])['CATEGORY_TITLE'].describe()['count'].reset_index().sort_values(by="count", ascending=False)
         fig = px.bar(dff,x= 'CATEGORY_TITLE', y= 'count')
 
     return fig
 
         
+        ##To powinnien być imput dla innych chartów      id='crossfilter-year--slider',
         
         
     
