@@ -15,6 +15,7 @@ app = Dash(__name__, external_stylesheets=external_stylesheets)
 
 
 app.layout = dbc.Container([
+    dcc.Store(id ='memory-output', data= [], storage_type='memory'),
     dbc.Row([
         html.Div('My First App with Data, Graph, and Controls', className="text-primary text-center fs-3")
     ]),
@@ -26,12 +27,13 @@ app.layout = dbc.Container([
                 df['VIDEO_TIME'].min(),
                 df['VIDEO_TIME'].max(),
                 step=None,
-                id='crossfilter-year--slider',
+                id='filter-minutes-slider',
                 value=[df['VIDEO_TIME'].min(), df['VIDEO_TIME'].max()],
                 # marks={str(year): str(year) for year in df['VIDEO_TIME'].unique()}
                 )
             ),
-            dcc.Graph(id='my-first-graph')
+            html.Div(id='my-first-graph', children=[])
+            # dcc.Graph(id='my-first-graph')
         ], width=6),
         dbc.Col([ 
             html.Div("The second of three columns", className="text-center my-3"),
@@ -42,7 +44,7 @@ app.layout = dbc.Container([
                     id = "filter-dropdown"
                 )
             ),
-            dcc.Graph(id='my-second-graph')
+            html.Div(id='my-second-graph', children=[])
         ], width=6)
     ]),
     dbc.Row([
@@ -58,23 +60,55 @@ app.layout = dbc.Container([
 
 ], fluid=True)
 
+
+@callback(
+        Output('memory-output','data'),
+        Input('filter-minutes-slider', 'value')
+)
+
+def filter_minutes(filter_minutes):
+     dff = df[(df['VIDEO_TIME']>= filter_minutes[0]) & (df['VIDEO_TIME']<= filter_minutes[1])]
+     return dff.to_dict('records')
+
+
+
+
 ##First chart
 @callback(
-    Output('my-first-graph', 'figure'),
-    Input('crossfilter-year--slider', 'value')
+    Output('my-first-graph', 'children'),
+    Input('memory-output','data')
 )
-def update_graf(crossfilter_year_slider):
-    dff = df[(df['VIDEO_TIME']>= crossfilter_year_slider[0]) & (df['VIDEO_TIME']<= crossfilter_year_slider[1])]
+def update_graf(data):
+    dff = pd.DataFrame(data)
     dff = dff.groupby(['YEAR_MONTH'])['YEAR_MONTH'].describe()['count'].reset_index().sort_values(by="YEAR_MONTH", ascending=True)
     fig = px.bar(dff, x= 'YEAR_MONTH', y= 'count')
 
-    return fig 
+    return dcc.Graph(figure= fig)  
+
+
+
+
+# ##First chart
+# @callback(
+#     Output('my-first-graph', 'children'),
+#     Input('crossfilter-year--slider', 'value')
+# )
+# def update_graf(crossfilter_year_slider):
+#     dff = df[(df['VIDEO_TIME']>= crossfilter_year_slider[0]) & (df['VIDEO_TIME']<= crossfilter_year_slider[1])]
+#     dff = dff.groupby(['YEAR_MONTH'])['YEAR_MONTH'].describe()['count'].reset_index().sort_values(by="YEAR_MONTH", ascending=True)
+#     fig = px.bar(dff, x= 'YEAR_MONTH', y= 'count')
+
+#     return dcc.Graph(figure= fig)  
+
+# chart 2  
 
 @callback(
-    Output('my-second-graph', 'figure'),
-    Input('filter-dropdown', 'value')
+    Output('my-second-graph', 'children'),
+    Input('filter-dropdown', 'value'),
+    Input('memory-output','data')
 )
-def update_second_graph(filter_dropdown):
+def update_second_graph(filter_dropdown, data ):
+    df= pd.DataFrame(data)
     if filter_dropdown== 'Avg. number of views':
         dff = df.groupby(["CATEGORY_TITLE"]).aggregate({"VIEWCOUNT": 'mean'}).reset_index().sort_values(by="VIEWCOUNT", ascending=False)
         fig = px.bar(dff,x= 'CATEGORY_TITLE', y= 'VIEWCOUNT')
@@ -85,10 +119,15 @@ def update_second_graph(filter_dropdown):
         dff = df.groupby(['CATEGORY_TITLE'])['CATEGORY_TITLE'].describe()['count'].reset_index().sort_values(by="count", ascending=False)
         fig = px.bar(dff,x= 'CATEGORY_TITLE', y= 'count')
 
-    return fig
+    return dcc.Graph(figure= fig)  
 
         
-        ##To powinnien być imput dla innych chartów      id='crossfilter-year--slider',
+
+
+
+
+
+
         
         
     
