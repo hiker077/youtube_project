@@ -11,6 +11,7 @@ df = pd.read_csv('data/dashboard_data/youtube_data_dashboard.csv')
 
 
 external_stylesheets = [dbc.themes.COSMO]
+
 app = Dash(__name__, external_stylesheets=external_stylesheets)
 
 
@@ -24,8 +25,8 @@ app.layout = dbc.Container([
             html.Div("One of three columns"),
             html.Div(
                 dcc.RangeSlider(
-                df['VIDEO_TIME'].min(),
-                df['VIDEO_TIME'].max(),
+                min=df['VIDEO_TIME'].min(),
+                max=df['VIDEO_TIME'].max(),
                 step=None,
                 id='filter-minutes-slider',
                 value=[df['VIDEO_TIME'].min(), df['VIDEO_TIME'].max()],
@@ -50,7 +51,7 @@ app.layout = dbc.Container([
     dbc.Row([
         dbc.Col([
             html.Div('3 Chart'),
-            dcc.Graph(id='my-third-graph')
+            html.Div(id='my-third-graph', children=[])
         ],width=6),
         dbc.Col([
             html.Div('4 Chart'),
@@ -63,7 +64,8 @@ app.layout = dbc.Container([
 
 @callback(
         Output('memory-output','data'),
-        Input('filter-minutes-slider', 'value')
+        Input('filter-minutes-slider', 'value'),
+
 )
 
 def filter_minutes(filter_minutes):
@@ -76,14 +78,36 @@ def filter_minutes(filter_minutes):
 ##First chart
 @callback(
     Output('my-first-graph', 'children'),
-    Input('memory-output','data')
+    Output('my-second-graph', 'children'),
+    Output('my-third-graph', 'children'),
+    Input('memory-output','data'),
+    Input('filter-dropdown', 'value')
 )
-def update_graf(data):
+def update_graf(data, filter_dropdown):
     dff = pd.DataFrame(data)
-    dff = dff.groupby(['YEAR_MONTH'])['YEAR_MONTH'].describe()['count'].reset_index().sort_values(by="YEAR_MONTH", ascending=True)
-    fig = px.bar(dff, x= 'YEAR_MONTH', y= 'count')
 
-    return dcc.Graph(figure= fig)  
+    ##First chart 
+    dff1 = dff.groupby(['YEAR_MONTH'])['YEAR_MONTH'].describe()['count'].reset_index().sort_values(by="YEAR_MONTH", ascending=True)
+    fig1 = px.line(dff1, x= 'YEAR_MONTH', y= 'count', markers=True)
+
+    ##Second chart 
+    if filter_dropdown== 'Avg. number of views':
+        dff2 = dff.groupby(["CATEGORY_TITLE"]).aggregate({"VIEWCOUNT": 'mean'}).reset_index().sort_values(by="VIEWCOUNT", ascending=False)
+        ##box plot 
+        fig2 = px.bar(dff2,x= 'CATEGORY_TITLE', y= 'VIEWCOUNT')
+    elif filter_dropdown== 'Avg. number of likes':
+        ##boxplot 
+        dff2 = dff.groupby(["CATEGORY_TITLE"]).aggregate({"LIKECOUNT": 'mean'}).reset_index().sort_values(by="LIKECOUNT", ascending=False)
+        fig2 = px.bar(dff2,x= 'CATEGORY_TITLE', y= 'LIKECOUNT')
+    elif filter_dropdown== 'Number of movies':
+        dff2 = dff.groupby(['CATEGORY_TITLE'])['CATEGORY_TITLE'].describe()['count'].reset_index().sort_values(by="count", ascending=False)
+        fig2 = px.bar(dff2,x= 'CATEGORY_TITLE', y= 'count')
+    ##Third chart
+
+    dff3 = dff.groupby(['DAY_OF_WEEK_NAME','PUBLISHED_PERIOD']).size().reset_index(name='COUNT')
+    fig3 = px.bar(dff3, x='DAY_OF_WEEK_NAME', y='COUNT', color='PUBLISHED_PERIOD')
+
+    return dcc.Graph(figure= fig1), dcc.Graph(figure= fig2), dcc.Graph(figure= fig3)
 
 
 
@@ -102,24 +126,24 @@ def update_graf(data):
 
 # chart 2  
 
-@callback(
-    Output('my-second-graph', 'children'),
-    Input('filter-dropdown', 'value'),
-    Input('memory-output','data')
-)
-def update_second_graph(filter_dropdown, data ):
-    df= pd.DataFrame(data)
-    if filter_dropdown== 'Avg. number of views':
-        dff = df.groupby(["CATEGORY_TITLE"]).aggregate({"VIEWCOUNT": 'mean'}).reset_index().sort_values(by="VIEWCOUNT", ascending=False)
-        fig = px.bar(dff,x= 'CATEGORY_TITLE', y= 'VIEWCOUNT')
-    elif filter_dropdown== 'Avg. number of likes':
-        dff = df.groupby(["CATEGORY_TITLE"]).aggregate({"LIKECOUNT": 'mean'}).reset_index().sort_values(by="LIKECOUNT", ascending=False)
-        fig = px.bar(dff,x= 'CATEGORY_TITLE', y= 'LIKECOUNT')
-    elif filter_dropdown== 'Number of movies':
-        dff = df.groupby(['CATEGORY_TITLE'])['CATEGORY_TITLE'].describe()['count'].reset_index().sort_values(by="count", ascending=False)
-        fig = px.bar(dff,x= 'CATEGORY_TITLE', y= 'count')
+# @callback(
+#     Output('my-second-graph', 'children'),
+#     Input('filter-dropdown', 'value'),
+#     Input('memory-output','data')
+# )
+# def update_second_graph(filter_dropdown, data ):
+#     dff2= pd.DataFrame(data)
+#     if filter_dropdown== 'Avg. number of views':
+#         dff2 = dff2.groupby(["CATEGORY_TITLE"]).aggregate({"VIEWCOUNT": 'mean'}).reset_index().sort_values(by="VIEWCOUNT", ascending=False)
+#         fig = px.bar(dff2,x= 'CATEGORY_TITLE', y= 'VIEWCOUNT')
+#     elif filter_dropdown== 'Avg. number of likes':
+#         dff2 = dff2.groupby(["CATEGORY_TITLE"]).aggregate({"LIKECOUNT": 'mean'}).reset_index().sort_values(by="LIKECOUNT", ascending=False)
+#         fig = px.bar(dff2,x= 'CATEGORY_TITLE', y= 'LIKECOUNT')
+#     elif filter_dropdown== 'Number of movies':
+#         dff2 = dff2.groupby(['CATEGORY_TITLE'])['CATEGORY_TITLE'].describe()['count'].reset_index().sort_values(by="count", ascending=False)
+#         fig = px.bar(dff2,x= 'CATEGORY_TITLE', y= 'count')
 
-    return dcc.Graph(figure= fig)  
+#     return dcc.Graph(figure= fig)  
 
         
 
