@@ -1,4 +1,4 @@
-from dash import Dash, html, dcc, callback, Output, Input
+from dash import Dash, html, dcc, callback, Output, Input, dash_table
 import plotly.express as px
 import dash_bootstrap_components as dbc
 import pandas as pd
@@ -55,11 +55,22 @@ app.layout = dbc.Container([
         ],width=6),
         dbc.Col([
             html.Div('4 Chart'),
-            dcc.Graph(id='my-fourth-graph')
+            html.Div(id='my-fourth-graph', children=[])
         ],width=6)
-    ])
+    ]),
+    dbc.Row(
+        html.Div(
+            dash_table.DataTable(
+                id='table-row-data',
+                columns=[{'name': i, 'id': i} for i in df.columns],
+                data=df.to_dict('records')
+                )
+        )
+    )
 
 ], fluid=True)
+
+
 
 
 @callback(
@@ -80,6 +91,9 @@ def filter_minutes(filter_minutes):
     Output('my-first-graph', 'children'),
     Output('my-second-graph', 'children'),
     Output('my-third-graph', 'children'),
+    Output('my-fourth-graph', 'children'),
+    Output('table-row-data', 'data'),
+    
     Input('memory-output','data'),
     Input('filter-dropdown', 'value')
 )
@@ -107,7 +121,11 @@ def update_graf(data, filter_dropdown):
     dff3 = dff.groupby(['DAY_OF_WEEK_NAME','PUBLISHED_PERIOD']).size().reset_index(name='COUNT')
     fig3 = px.bar(dff3, x='DAY_OF_WEEK_NAME', y='COUNT', color='PUBLISHED_PERIOD')
 
-    return dcc.Graph(figure= fig1), dcc.Graph(figure= fig2), dcc.Graph(figure= fig3)
+    ##Forth chart was impelemnted 
+    fig4 = px.box(dff, x='CATEGORY_TITLE', y='VIDEO_TIME')
+
+
+    return dcc.Graph(figure= fig1), dcc.Graph(figure= fig2), dcc.Graph(figure= fig3), dcc.Graph(figure= fig4), dff.to_dict('records')
 
 
 
