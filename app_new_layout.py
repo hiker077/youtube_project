@@ -1,5 +1,6 @@
 from dash import Dash, html, dcc, callback, Output, Input, State, dash_table
 import plotly.express as px
+# import plotly.graph_objects as go
 import dash_bootstrap_components as dbc
 import pandas as pd
 
@@ -26,9 +27,8 @@ NAVBAR = dbc.Navbar(
         dbc.Row(
             [
                 dbc.Col(html.Img(src=YOUTUBE_LOGO, height="60px")),
-                dbc.Col(
-                    dbc.NavbarBrand("Analyse your favourite Youtube channel")
-                ),
+                dbc.Col("Dashboad"),
+                dbc.Col("Repository")
             ],
             align="center"
         )
@@ -55,13 +55,31 @@ FILTER_CARD =[
                         step=50,
                         id='filter-minutes-slider',
                         value=[df['VIDEO_TIME'].min(), df['VIDEO_TIME'].max()],
-                        )
-                    )
+                        ))
+                    # html.Div(
+                    #     dcc.Dropdown(
+                    #     options=["Avg. number of views", "Avg. number of likes", "Number of movies"],
+                    #     value ="Number of movies",
+                    #     id = "filter-dropdown"
+                    #     )
+                    # )
                 ]
             )]
         )]
     )
 ]
+
+FIRST_CHART = [
+    dbc.CardHeader(html.H5("First chart", className="display-6 card-title")),
+    dbc.CardBody(
+        [
+            dcc.Graph(id='first-graph')
+        ]
+    )
+]
+
+
+
 
 BODY = dbc.Container(
     [
@@ -71,8 +89,18 @@ BODY = dbc.Container(
             dbc.Col(dbc.Card(FILTER_CARD, color='light') , md=2),
             dbc.Col(
                 [
-                    dbc.Row(html.H4('Test1')),
-                    dbc.Row(html.H4('Test1'))
+                    dbc.Row(
+                        [
+                            dbc.Col(dbc.Card(FIRST_CHART)),
+                            dbc.Col("Dupa")
+                        ]
+                            ),
+                    dbc.Row(
+                            [
+                            dbc.Col("Dupa"),
+                            dbc.Col("Dupa")
+                            ]
+                             )
                 ],
                 md=10
             )
@@ -93,7 +121,17 @@ app.layout = html.Div(children=[NAVBAR, BODY])
 
 
 
+# Callbacks 
 
+@app.callback(
+    Output('first-graph', 'figure'),
+    Input('filter-minutes-slider', 'value')
+)
+def update_graf(filter_minutes):
+    dff = df[(df['VIDEO_TIME']>= filter_minutes[0]) & (df['VIDEO_TIME']<= filter_minutes[1])]
+    dff1 = dff.groupby(['YEAR_MONTH'])['YEAR_MONTH'].describe()['count'].reset_index().sort_values(by="YEAR_MONTH", ascending=True)
+    fig1 = px.line(dff1, x= 'YEAR_MONTH', y= 'count', markers=True)
+    return fig1
 
 
 
