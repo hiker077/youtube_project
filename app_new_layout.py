@@ -110,6 +110,15 @@ BODY = dbc.Container(
         ],
          style={"marginTop": 30}
     ),
+    dbc.Row(
+        html.Div(
+            dash_table.DataTable(
+                id='table-data',
+                # columns=[{'name': i, 'id': i} for i in df.columns],
+                # data=df.to_dict('records')
+                )
+        )
+    )
 
     ],fluid=True
 
@@ -171,7 +180,7 @@ def update_graf3(filter_minutes, filter_dropdown):
 
     return fig3
 
-
+#fourth chart
 @callback(
     Output('fourth-graph', 'figure'),
     Input('filter-minutes-slider', 'value'),
@@ -183,6 +192,18 @@ def update_graf4(filter_minutes, filter_dropdown):
     fig4 = px.box(df4, x='CATEGORY_TITLE', y='VIDEO_TIME')
     return fig4
 
+
+#table data 
+@callback(
+    Output('table-data', 'data'),
+    Input('filter-minutes-slider', 'value'),
+    Input('dropdown-filter', 'value')
+)
+
+def update_table(filter_minutes, filter_dropdown):
+    df_table = filter_data(df, filter_minutes, filter_dropdown)
+    df_table=df_table.to_dict('records')
+    return df_table
 
 
 
