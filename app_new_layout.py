@@ -69,14 +69,14 @@ FILTER_CARD =[
     )
 ]
 
-FIRST_CHART = [
-    dbc.CardHeader(html.H5("First chart", className="display-6 card-title")),
-    dbc.CardBody(
-        [
-            dcc.Graph(id='first-graph')
-        ]
-    )
-]
+# FIRST_CHART = [
+#     # dbc.CardHeader(html.H5("First chart", className="display-6 card-title")),
+#     # dbc.CardBody(
+#     #     [
+#             dcc.Graph(id='first-graph')
+#     #     ]
+#     # )
+# ]
 
 
 
@@ -91,8 +91,9 @@ BODY = dbc.Container(
                 [
                     dbc.Row(
                         [
-                            dbc.Col(dbc.Card(FIRST_CHART)),
-                            dbc.Col("Dupa")
+                            # dbc.Col(dbc.Card(FIRST_CHART)),
+                            dbc.Col(dcc.Graph(id='first-graph')),
+                            dbc.Col(dcc.Graph(id='second-graph'))
                         ]
                             ),
                     dbc.Row(
@@ -121,19 +122,63 @@ app.layout = html.Div(children=[NAVBAR, BODY])
 
 
 
-# Callbacks 
-
+##First Graph 
 @app.callback(
     Output('first-graph', 'figure'),
     Input('filter-minutes-slider', 'value')
 )
-def update_graf(filter_minutes):
-    dff = df[(df['VIDEO_TIME']>= filter_minutes[0]) & (df['VIDEO_TIME']<= filter_minutes[1])]
-    dff1 = dff.groupby(['YEAR_MONTH'])['YEAR_MONTH'].describe()['count'].reset_index().sort_values(by="YEAR_MONTH", ascending=True)
-    fig1 = px.line(dff1, x= 'YEAR_MONTH', y= 'count', markers=True)
+def update_graf1(filter_minutes):
+    df1 = filter_data(df, filter_minutes)
+    df1 = df.groupby(['YEAR_MONTH'])['YEAR_MONTH'].describe()['count'].reset_index().sort_values(by="YEAR_MONTH", ascending=True)
+    fig1 = px.line(df1, x= 'YEAR_MONTH', y= 'count', markers=True)
     return fig1
 
 
+##Second Graph
+
+
+@callback(
+   Output('second-graph', 'figure'),
+   Input('filter-minutes-slider', 'value')
+)
+def update_graf2(filter_minutes):
+    # dff = df[(df['VIDEO_TIME']>= filter_minutes[0]) & (df['VIDEO_TIME']<= filter_minutes[1])]
+    df2 = filter_data(df, filter_minutes)
+    df2 = df2.groupby(["CATEGORY_TITLE"]).aggregate({"VIEWCOUNT": 'mean',"LIKECOUNT": ['mean', 'count']}).reset_index()
+    df2.columns = ['_'.join(col).strip('_') for col in df2.columns]
+    fig2 = px.scatter(df2, x = 'VIEWCOUNT_mean', y= 'LIKECOUNT_mean',size= 'LIKECOUNT_count', color='CATEGORY_TITLE')
+    
+    return fig2
+
+
+
+
+def filter_data(df, filter1, *charts_data):
+    if filter1[0] or filter1[1]:
+        df = df[(df['VIDEO_TIME']>= filter1[0]) & (df['VIDEO_TIME']<= filter1[1])]
+    
+    return df
+
+
+
+#  if filter_dropdown== 'Avg. number of views':
+#         dff2 = dff.groupby(["CATEGORY_TITLE"]).aggregate({"VIEWCOUNT": 'mean'}).reset_index().sort_values(by="VIEWCOUNT", ascending=False)
+#         ##box plot 
+#         fig2 = px.bar(dff2,x= 'CATEGORY_TITLE', y= 'VIEWCOUNT')
+#     elif filter_dropdown== 'Avg. number of likes':
+#         ##boxplot 
+#         dff2 = dff.groupby(["CATEGORY_TITLE"]).aggregate({"LIKECOUNT": 'mean'}).reset_index().sort_values(by="LIKECOUNT", ascending=False)
+#         fig2 = px.bar(dff2,x= 'CATEGORY_TITLE', y= 'LIKECOUNT')
+#     elif filter_dropdown== 'Number of movies':
+#         dff2 = dff.groupby(['CATEGORY_TITLE'])['CATEGORY_TITLE'].describe()['count'].reset_index().sort_values(by="count", ascending=False)
+#         fig2 = px.bar(dff2,x= 'CATEGORY_TITLE', y= 'count')
+
+
+#Third Graph
+
+
+#     dff3 = dff.groupby(['DAY_OF_WEEK_NAME','PUBLISHED_PERIOD']).size().reset_index(name='COUNT')
+#     fig3 = px.bar(dff3, x='DAY_OF_WEEK_NAME', y='COUNT', color='PUBLISHED_PERIOD')
 
 
 
