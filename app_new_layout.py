@@ -47,7 +47,7 @@ FILTER_CARD =[
             [
             dbc.Col(
                 [
-                    html.Div("One of three columns"),
+                    html.Div("Duration of video (minutes)"),
                     html.Div(
                         dcc.RangeSlider(
                         min=df['VIDEO_TIME'].min(),
@@ -55,14 +55,16 @@ FILTER_CARD =[
                         step=50,
                         id='filter-minutes-slider',
                         value=[df['VIDEO_TIME'].min(), df['VIDEO_TIME'].max()],
-                        ))
-                    # html.Div(
-                    #     dcc.Dropdown(
-                    #     options=["Avg. number of views", "Avg. number of likes", "Number of movies"],
-                    #     value ="Number of movies",
-                    #     id = "filter-dropdown"
-                    #     )
-                    # )
+                        )),
+                    html.Div("Categories"),
+                    html.Div(
+                        dcc.Dropdown(
+                        options= df['CATEGORY_TITLE'].unique(),
+                        value= df['CATEGORY_TITLE'].unique(),
+                        multi=True,
+                        id= 'dropdown-filter'
+                        )
+                    )
                 ]
             )]
         )]
@@ -92,14 +94,14 @@ BODY = dbc.Container(
                     dbc.Row(
                         [
                             # dbc.Col(dbc.Card(FIRST_CHART)),
-                            dbc.Col(dcc.Graph(id='first-graph')),
-                            dbc.Col(dcc.Graph(id='second-graph'))
+                            dbc.Col(dcc.Graph(id='first-graph'), md=6),
+                            dbc.Col(dcc.Graph(id='second-graph'), md=6)
                         ]
                             ),
                     dbc.Row(
                             [
-                            dbc.Col("Dupa"),
-                            dbc.Col("Dupa")
+                            dbc.Col(dcc.Graph(id='third-graph'), md=6),
+                            dbc.Col(dcc.Graph(id='fourth-graph'), md=6)
                             ]
                              )
                 ],
@@ -125,10 +127,11 @@ app.layout = html.Div(children=[NAVBAR, BODY])
 ##First Graph 
 @app.callback(
     Output('first-graph', 'figure'),
-    Input('filter-minutes-slider', 'value')
+    Input('filter-minutes-slider', 'value'),
+    Input('dropdown-filter', 'value')
 )
-def update_graf1(filter_minutes):
-    df1 = filter_data(df, filter_minutes)
+def update_graf1(filter_minutes, filter_dropdown):
+    df1 = filter_data(df, filter_minutes, filter_dropdown)
     df1 = df.groupby(['YEAR_MONTH'])['YEAR_MONTH'].describe()['count'].reset_index().sort_values(by="YEAR_MONTH", ascending=True)
     fig1 = px.line(df1, x= 'YEAR_MONTH', y= 'count', markers=True)
     return fig1
@@ -139,11 +142,12 @@ def update_graf1(filter_minutes):
 
 @callback(
    Output('second-graph', 'figure'),
-   Input('filter-minutes-slider', 'value')
+   Input('filter-minutes-slider', 'value'),
+   Input('dropdown-filter', 'value')
 )
-def update_graf2(filter_minutes):
+def update_graf2(filter_minutes, filter_dropdown):
     # dff = df[(df['VIDEO_TIME']>= filter_minutes[0]) & (df['VIDEO_TIME']<= filter_minutes[1])]
-    df2 = filter_data(df, filter_minutes)
+    df2 = filter_data(df, filter_minutes, filter_dropdown)
     df2 = df2.groupby(["CATEGORY_TITLE"]).aggregate({"VIEWCOUNT": 'mean',"LIKECOUNT": ['mean', 'count']}).reset_index()
     df2.columns = ['_'.join(col).strip('_') for col in df2.columns]
     fig2 = px.scatter(df2, x = 'VIEWCOUNT_mean', y= 'LIKECOUNT_mean',size= 'LIKECOUNT_count', color='CATEGORY_TITLE')
@@ -151,11 +155,46 @@ def update_graf2(filter_minutes):
     return fig2
 
 
+##Third Graph 
 
 
-def filter_data(df, filter1, *charts_data):
+@callback(
+    Output('third-graph', 'figure'),
+    Input('filter-minutes-slider', 'value'),
+    Input('dropdown-filter', 'value')
+)
+
+def update_graf3(filter_minutes, filter_dropdown):
+    df3 = filter_data(df, filter_minutes, filter_dropdown)
+    df3 = df3.groupby(['DAY_OF_WEEK_NAME','PUBLISHED_PERIOD']).size().reset_index(name='COUNT')
+    fig3 = px.bar(df3, x='DAY_OF_WEEK_NAME', y='COUNT', color='PUBLISHED_PERIOD')
+
+    return fig3
+
+
+@callback(
+    Output('fourth-graph', 'figure'),
+    Input('filter-minutes-slider', 'value'),
+    Input('dropdown-filter', 'value')
+)
+
+def update_graf4(filter_minutes, filter_dropdown):
+    df4 = filter_data(df, filter_minutes, filter_dropdown)
+    fig4 = px.box(df4, x='CATEGORY_TITLE', y='VIDEO_TIME')
+    return fig4
+
+
+
+
+
+
+
+def filter_data(df, filter1, filter2, *charts_data):
     if filter1[0] or filter1[1]:
         df = df[(df['VIDEO_TIME']>= filter1[0]) & (df['VIDEO_TIME']<= filter1[1])]
+
+    if filter2:
+        df = df[df['CATEGORY_TITLE'].isin(filter2)]
     
     return df
 
