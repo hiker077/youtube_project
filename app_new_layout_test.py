@@ -223,10 +223,6 @@ def filter_data(data, filter1, filter2, charts_data):
 
 
 
-sadsadasdsa 
-
-asdsadsad 
-
 
 
 ##https://dash-example-index.herokuapp.com/
