@@ -6,18 +6,9 @@ import pandas as pd
 
 YOUTUBE_LOGO ='https://upload.wikimedia.org/wikipedia/commons/b/b8/YouTube_Logo_2017.svg'
 df = pd.read_csv('data/dashboard_data/youtube_data_dashboard.csv')
-#count po grupie peirod 
-# grouped_df = df.groupby(['PUBLISHED_PERIOD']).size().reset_index(name='Count')
-# fig = px.bar(grouped_df, x='PUBLISHED_PERIOD', y='Count')
 
 
 external_stylesheets = [dbc.themes.COSMO]
-
-
-
-
-
-
 
 
 
@@ -47,6 +38,7 @@ FILTER_CARD =[
             [
             dbc.Col(
                 [
+                    html.Div(dcc.Store(id='output-data', data= df.to_dict('records'))),
                     html.Button("Reset Selection", id='reset-button', n_clicks=0),
                     html.Div("Duration of video (minutes)"),
                     html.Div(
@@ -72,16 +64,6 @@ FILTER_CARD =[
     )
 ]
 
-# FIRST_CHART = [
-#     # dbc.CardHeader(html.H5("First chart", className="display-6 card-title")),
-#     # dbc.CardBody(
-#     #     [
-#             dcc.Graph(id='first-graph')
-#     #     ]
-#     # )
-# ]
-
-
 
 
 BODY = dbc.Container(
@@ -94,19 +76,14 @@ BODY = dbc.Container(
                 [
                     dbc.Row(
                         [
-                            # dbc.Col(dbc.Card(FIRST_CHART)),
-                            # dbc.Col(dcc.Graph(id={'type': 'graph', 'index': 'first'},config={"displayModeBar": False}), md=6),
-                            # dbc.Col(dcc.Graph(id={'type': 'graph', 'index': 'second'},config={"displayModeBar": False}), md=6)
-                            dbc.Col(dcc.Graph(id='graph1',config={"displayModeBar": True}), md=6),
-                            dbc.Col(dcc.Graph(id='graph2',config={"displayModeBar": False}), md=6)
+                            dbc.Col(dcc.Graph(id='chart-1',config={"displayModeBar": False}), md=6),
+                            dbc.Col(dcc.Graph(id='chart-2',config={"displayModeBar": False}), md=6)
                         ]
                             ),
                     dbc.Row(
                             [
-                            # dbc.Col(dcc.Graph(id={'type': 'graph', 'index': 'third'},config={"displayModeBar": False}), md=6),
-                            # dbc.Col(dcc.Graph(id={'type': 'graph', 'index': 'fourth'},config={"displayModeBar": False}), md=6)
-                            dbc.Col(dcc.Graph(id='graph3',config={"displayModeBar": False}), md=6),
-                            dbc.Col(dcc.Graph(id='graph4',config={"displayModeBar": False}), md=6)
+                            dbc.Col(dcc.Graph(id='chart-3',config={"displayModeBar": False}), md=6),
+                            dbc.Col(dcc.Graph(id='chart-4',config={"displayModeBar": False}), md=6)
                             ]
                              )
                 ],
@@ -128,7 +105,6 @@ BODY = dbc.Container(
     ],fluid=True
 
 )
-
 
 
 
@@ -159,42 +135,60 @@ def chart_funtion(dff):
 
 
 
+def filter_data(df, input_value, chart_name, is_month = False):
+    
+    input_value = input_value['points'][0]['x']
+
+    if is_month:
+        month = pd.to_datetime(input_value).strftime('%Y-%m')
+
+    if chart_name=='chart-1':
+        dff = df[df['YEAR_MONTH']==month]
+    elif chart_name=='chart-3':
+        dff = df[df['DAY_OF_WEEK_NAME']==input_value]
+    elif chart_name=='chart-4':
+        dff = df[df['CATEGORY_TITLE']==input_value]
+
+    figg1, figg2, figg3, figg4 = chart_funtion(dff)
+ 
+    return figg1, figg2, figg3, figg4 
+
+
 
 @app.callback(
-    # Output({'type': 'graph', 'index': ALL}, 'figure'),
-    Output('graph1', 'figure'),
-    Output('graph2', 'figure'),
-    Output('graph3', 'figure'),
-    Output('graph4', 'figure'),
 
-    Input('filter-minutes-slider', 'value'),
-    Input('dropdown-filter', 'value'),
-    Input('graph1', 'clickData'),
-    Input('reset-button', 'n_clicks')
-    # Input({'type': 'graph', 'index': ALL}, 'selectedData')
+    Output('chart-1', 'figure'),
+    Output('chart-2', 'figure'),
+    Output('chart-3', 'figure'),
+    Output('chart-4', 'figure'),
+    Input('chart-1', 'clickData'),
+    Input('chart-3', 'clickData'),
+    Input('chart-4', 'clickData'),
+    Input('reset-button', 'n_clicks'),
+    Input('output-data', 'data')
 )
 
-def update_all(filter_minutes, filter_dropdown, clickData, n_clicks):
-    # dff = filter_data(df, filter_minutes, filter_dropdown, charts_data)
-    triggered_id = ctx.triggered_id
-    print(triggered_id)
+def update_all(chart1_data, chart3_data, chart4_data, rest_button, store_data):
 
-    if triggered_id=='graph1':
+    triggered_id = ctx.triggered_id
+    dff = pd.DataFrame(store_data)
+
+    if triggered_id=='chart-1':
         try:
-            month = clickData['points'][0]['x']
-            month = pd.to_datetime(month).strftime('%Y-%m')
-            dff = df[df['YEAR_MONTH'] == month]
-            figg1, figg2, figg3, figg4 = chart_funtion(dff)
+            figg1, figg2, figg3, figg4 = filter_data(dff, chart1_data, triggered_id, True)
         except Exception as e:
             print(f"Error parsing month: {e}")
-            figg1, figg2, figg3, figg4 = chart_funtion(df)
+            figg1, figg2, figg3, figg4 = filter_data(dff, chart1_data, triggered_id, True)
+    elif triggered_id=='chart-2':
+        figg1, figg2, figg3, figg4 = filter_data(dff, chart3_data, triggered_id)
+    elif triggered_id=='chart-4':
+        figg1, figg2, figg3, figg4 = filter_data(dff, chart4_data, triggered_id)
     elif triggered_id=='reset-button':
         figg1, figg2, figg3, figg4 = chart_funtion(df)
     else:
         figg1, figg2, figg3, figg4 = chart_funtion(df)
     
     return figg1, figg2, figg3, figg4
-
 
 
 # Run the app
