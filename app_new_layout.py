@@ -96,7 +96,7 @@ BODY = dbc.Container(
         html.Div(
             dash_table.DataTable(
                 id='table-data',
-                # columns=[{'name': i, 'id': i} for i in df.columns],
+                columns=[{'name': i, 'id': i} for i in df.columns]
                 # data=df.to_dict('records')
                 )
         )
@@ -151,7 +151,7 @@ def filter_data(df, input_value, chart_name, is_month = False):
 
     figg1, figg2, figg3, figg4 = chart_funtion(dff)
  
-    return figg1, figg2, figg3, figg4 
+    return figg1, figg2, figg3, figg4, dff
 
 
 
@@ -161,6 +161,7 @@ def filter_data(df, input_value, chart_name, is_month = False):
     Output('chart-2', 'figure'),
     Output('chart-3', 'figure'),
     Output('chart-4', 'figure'),
+    Output('table-data', 'data'),
     Input('chart-1', 'clickData'),
     Input('chart-3', 'clickData'),
     Input('chart-4', 'clickData'),
@@ -175,20 +176,22 @@ def update_all(chart1_data, chart3_data, chart4_data, rest_button, store_data):
 
     if triggered_id=='chart-1':
         try:
-            figg1, figg2, figg3, figg4 = filter_data(dff, chart1_data, triggered_id, True)
+            figg1, figg2, figg3, figg4, dff = filter_data(dff, chart1_data, triggered_id, True)
         except Exception as e:
             print(f"Error parsing month: {e}")
-            figg1, figg2, figg3, figg4 = filter_data(dff, chart1_data, triggered_id, True)
+            figg1, figg2, figg3, figg4, dff = filter_data(dff, chart1_data, triggered_id, True)
     elif triggered_id=='chart-2':
-        figg1, figg2, figg3, figg4 = filter_data(dff, chart3_data, triggered_id)
+        figg1, figg2, figg3, figg4, dff = filter_data(dff, chart3_data, triggered_id)
     elif triggered_id=='chart-4':
-        figg1, figg2, figg3, figg4 = filter_data(dff, chart4_data, triggered_id)
+        figg1, figg2, figg3, figg4, dff = filter_data(dff, chart4_data, triggered_id)
     elif triggered_id=='reset-button':
         figg1, figg2, figg3, figg4 = chart_funtion(df)
+        dff=df.to_dict('records')
     else:
         figg1, figg2, figg3, figg4 = chart_funtion(df)
-    
-    return figg1, figg2, figg3, figg4
+        dff=df.to_dict('records')
+
+    return figg1, figg2, figg3, figg4, dff
 
 
 # Run the app
