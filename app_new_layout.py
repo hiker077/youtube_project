@@ -155,44 +155,34 @@ def filters_data(df, minutes_filter): #, dropdown_filter):
 
 
 
-def chart_filter(df, chart1_state, chart3_state, chart4_state , trigger_id, filter_1, is_month = False):
+def chart_filter(df, chart1_state, chart3_state, chart4_state , trigger_id, filter_1, state_data, is_month = False):
     
-    # print(minutes_filter[0])
-    # if chart1_state:
-    #     chart1_state = chart1_state['points'][0]['x']
-    # else:
-    #     chart1_state= True
-
-    # if chart3_state:
-    #     chart3_state = chart3_state['points'][0]['x']
-    # else:
-    #     chart3_state= True
-
-    # if chart4_state:
-    #     chart4_state = chart4_state['points'][0]['x']
-    # else:
-    #     chart4_state= True
-    # print(chart1_state)
-    # print(chart3_state)
-    # print(chart4_state)
 
     dff = df
     dff = dff[(dff['VIDEO_TIME']>= filter_1[0]) & (dff['VIDEO_TIME']<= filter_1[1])]
+    state_data = state_data if state_data is not None else {}
 
-    if chart1_state is not None:
-        chart1_state = chart1_state['points'][0]['x']
-        month = pd.to_datetime(chart1_state).strftime('%Y-%m')
-        dff = dff[dff['YEAR_MONTH']==month]
-    
-    if chart3_state is not None:
-        chart3_state = chart3_state['points'][0]['x']
-        dff = dff[dff['DAY_OF_WEEK_NAME']==chart3_state]
+    if trigger_id is not None and trigger_id != 'reset-button':
+        state_data[trigger_id] = True
+
+        if chart1_state is not None and state_data.get('chart-1'):
+            chart1_state = chart1_state['points'][0]['x']
+            month = pd.to_datetime(chart1_state).strftime('%Y-%m')
+            dff = dff[dff['YEAR_MONTH']==month]
         
-    if chart4_state is not None:
-        chart4_state = chart4_state['points'][0]['x']
-        dff = dff[dff['CATEGORY_TITLE']==chart4_state]
+        if chart3_state is not None and state_data.get('chart-3'):
+            chart3_state = chart3_state['points'][0]['x']
+            dff = dff[dff['DAY_OF_WEEK_NAME']==chart3_state]
+
+        if chart4_state is not None and state_data.get('chart-4'):
+            chart4_state = chart4_state['points'][0]['x']
+            dff = dff[dff['CATEGORY_TITLE']==chart4_state]
+    else:
+        state_data = {}
 
 
+    print(state_data)
+    
     # if is_month:
     #     month = pd.to_datetime(chart_clickdata).strftime('%Y-%m')
 
@@ -207,7 +197,7 @@ def chart_filter(df, chart1_state, chart3_state, chart4_state , trigger_id, filt
 
     # figg1, figg2, figg3, figg4 = chart_funtion(dff)
  
-    return dff
+    return dff, state_data
 
 
 
@@ -239,9 +229,12 @@ def update_all(chart1_data, chart3_data, chart4_data, rest_button, store_data, m
 
     triggered_id = ctx.triggered_id
     dff = pd.DataFrame(store_data)
-    print(chart1_state)
-    print(chart3_state)
-    print(chart4_state)
+    # print(chart1_state)
+    # print(chart3_state)
+    # print(chart4_state)
+
+  
+
 
 
     # if triggered_id=='chart-1':
@@ -279,10 +272,10 @@ def update_all(chart1_data, chart3_data, chart4_data, rest_button, store_data, m
     #     filter_value = no_update
     #     state_data = state_data
     
-    dff = chart_filter(dff, chart1_state, chart3_state, chart4_state, triggered_id, state_of_slider,  True)
+    dff, state_data = chart_filter(dff, chart1_state, chart3_state, chart4_state, triggered_id, state_of_slider, state_data,   True)
     figg1, figg2, figg3, figg4 = chart_funtion(dff)
     filter_value = no_update
-    state_data = no_update
+    # state_data = no_update
 
     dff =  dff.to_dict('records')
 
@@ -294,10 +287,6 @@ def update_all(chart1_data, chart3_data, chart4_data, rest_button, store_data, m
 
 
 
-
-
-
-##Napraw state-data - check! 
 
 
 
@@ -326,9 +315,6 @@ if __name__ == '__main__':
 
 
 ### To do 
-#Dodać jednak drugi callback do pierwszego i pomysl o dodatniu drugie dcc.Store
-# 
-#  
-# dodać filtry w tabeli 
-# zmienijszyc wyswietlanie TITLE do 25 znakow 
-## callback problem z filtrem! 
+# 1) w funkcji chart_filter dodac w parametrach state_data 
+# w poszczegolnych pozycjac sprawdzac stany np. State_data.get{}, jezeli rozne od 0 to korzystaj 
+# 2) dodac zmiane system state w przypadku restetu! S 
