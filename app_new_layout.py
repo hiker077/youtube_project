@@ -11,7 +11,6 @@ df = pd.read_csv('data/dashboard_data/youtube_data_dashboard.csv')
 external_stylesheets = [dbc.themes.COSMO]
 
 
-
 NAVBAR = dbc.Navbar(
     children=[
         # Use row and col to control vertical alignment of logo / brand
@@ -38,7 +37,7 @@ FILTER_CARD =[
             [
             dbc.Col(
                 [
-                    html.Div(dcc.Store(id='output-data',data= df.to_dict('records'))),
+                    html.Div(dcc.Store(id='master-data',data= df.to_dict('records'))),
                     # html.Div(dcc.Store(id='state-data', data= {'State': 1})),
                     html.Div(dcc.Store(id='state-data')),
                     html.Button("Reset Selection", id='reset-button', n_clicks=0),
@@ -48,7 +47,7 @@ FILTER_CARD =[
                         min=df['VIDEO_TIME'].min(),
                         max=df['VIDEO_TIME'].max(),
                         step=50,
-                        id='filter-minutes-slider',
+                        id='slider-filter',
                         value=[df['VIDEO_TIME'].min(), df['VIDEO_TIME'].max()],
                         )),
                     html.Div("Categories"),
@@ -65,7 +64,6 @@ FILTER_CARD =[
         )]
     )
 ]
-
 
 
 BODY = dbc.Container(
@@ -98,10 +96,9 @@ BODY = dbc.Container(
         html.Div(
             dash_table.DataTable(
                 id='table-data',
-                # columns=[{'name': i, 'id': i} for i in df.columns],
                 columns=[{'name': i, 'id': i} for i in ['TITLE', 'VIEWCOUNT', 'LIKECOUNT', 'COMMENTCOUNT', 'PUBLISHED_PERIOD', 'DAY_OF_WEEK_NAME', 'CATEGORY_TITLE']],
                 page_size=50
-                # data=df.to_dict('records')
+
                 )
         )
     )
@@ -117,8 +114,7 @@ app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 app.layout = html.Div(children=[NAVBAR, BODY])
 
 
-
-def chart_funtion(dff):
+def chart_bulilder(dff):
     ## Chart 1 
     # df1 = dff.groupby(['YEAR_MONTH'])['YEAR_MONTH'].describe()['count'].reset_index().sort_values(by="YEAR_MONTH", ascending=True)
     df1 = dff.groupby('YEAR_MONTH')['YEAR_MONTH'].count().reset_index(name='count').sort_values(by="YEAR_MONTH", ascending=True)
@@ -139,63 +135,32 @@ def chart_funtion(dff):
     return fig1, fig2, fig3, fig4
 
 
-def filters_data(df, minutes_filter): #, dropdown_filter):
+def data_filter(dff, chart1_state, chart3_state, chart4_state , trigger_id, filter_1, state_data, is_month = False):
     
-    dff = df
-    if minutes_filter:
-        dff = dff[(dff['VIDEO_TIME']>= minutes_filter[0]) & (dff['VIDEO_TIME']<= minutes_filter[1])]
-    # elif dropdown_filter:
-    #     dff = 
-    else: 
-        dff = df
-
-    return dff
-
-
-
-
-
-def chart_filter(df, chart1_state, chart3_state, chart4_state , trigger_id, filter_1, state_data, is_month = False):
-    
-
-    dff = df
     dff = dff[(dff['VIDEO_TIME']>= filter_1[0]) & (dff['VIDEO_TIME']<= filter_1[1])]
     state_data = state_data if state_data is not None else {}
 
     if trigger_id is not None and trigger_id != 'reset-button':
-        state_data[trigger_id] = True
 
-        if chart1_state is not None and state_data.get('chart-1'):
+        if trigger_id in state_data:
+            state_data.pop(trigger_id)      
+        else:
+            state_data[trigger_id] = 0
+
+        if chart1_state is not None and 'chart-1' in state_data:
             chart1_state = chart1_state['points'][0]['x']
             month = pd.to_datetime(chart1_state).strftime('%Y-%m')
             dff = dff[dff['YEAR_MONTH']==month]
         
-        if chart3_state is not None and state_data.get('chart-3'):
+        if chart3_state is not None and 'chart-3' in state_data:
             chart3_state = chart3_state['points'][0]['x']
             dff = dff[dff['DAY_OF_WEEK_NAME']==chart3_state]
 
-        if chart4_state is not None and state_data.get('chart-4'):
+        if chart4_state is not None and 'chart-4' in state_data:
             chart4_state = chart4_state['points'][0]['x']
             dff = dff[dff['CATEGORY_TITLE']==chart4_state]
     else:
         state_data = {}
-
-
-    print(state_data)
-    
-    # if is_month:
-    #     month = pd.to_datetime(chart_clickdata).strftime('%Y-%m')
-
-    # if trigger_id=='chart-1':
-    #     dff = dff[dff['YEAR_MONTH']==month]
-    # elif trigger_id=='chart-3':
-    #     dff = dff[dff['DAY_OF_WEEK_NAME']==chart_clickdata]
-    # elif trigger_id=='chart-4':
-    #     dff = dff[dff['CATEGORY_TITLE']==chart_clickdata]
-    # else: 
-        # dff
-
-    # figg1, figg2, figg3, figg4 = chart_funtion(dff)
  
     return dff, state_data
 
@@ -207,104 +172,35 @@ def chart_filter(df, chart1_state, chart3_state, chart4_state , trigger_id, filt
     Output('chart-3', 'figure'),
     Output('chart-4', 'figure'),
     Output('table-data', 'data'),
-    Output('filter-minutes-slider', 'value'),
+    Output('slider-filter', 'value'),
     Output('state-data', 'data'),
     
     Input('chart-1', 'clickData'),
     Input('chart-3', 'clickData'),
     Input('chart-4', 'clickData'),
     Input('reset-button', 'n_clicks'),
-    Input('output-data', 'data'),
-    Input('filter-minutes-slider', 'value'),
+    Input('master-data', 'data'),
+    Input('slider-filter', 'value'),
     Input('dropdown-filter', 'value'),
     Input('state-data', 'data'),
 
-    State('filter-minutes-slider', 'value'),
+    State('slider-filter', 'value'),
     State('chart-1', 'clickData'),
     State('chart-3', 'clickData'),
     State('chart-4', 'clickData'),
 )
 
-def update_all(chart1_data, chart3_data, chart4_data, rest_button, store_data, minutes_filter, dropdown_filter,state_data, state_of_slider, chart1_state, chart3_state, chart4_state ):
+
+def update_all(chart1_data, chart3_data, chart4_data, rest_button, master_data, slider_filter, dropdown_filter, state_data, slider_filter_state, chart1_state, chart3_state, chart4_state ):
 
     triggered_id = ctx.triggered_id
-    dff = pd.DataFrame(store_data)
-    # print(chart1_state)
-    # print(chart3_state)
-    # print(chart4_state)
-
-  
-
-
-
-    # if triggered_id=='chart-1':
-    #     try:
-    #         dff = chart_filter(dff, chart1_data, triggered_id,state_of_slider,  True)
-    #         figg1, figg2, figg3, figg4 = chart_funtion(dff)
-    #         filter_value = no_update
-    #         state_data = {'State': '1' }
-    #     except Exception as e:
-    #         print(f"Error parsing month: {e}")
-    #         dff = chart_filter(dff, chart1_data, triggered_id, state_of_slider, True)
-    #         figg1, figg2, figg3, figg4 = chart_funtion(dff)
-    #         filter_value = no_update
-    #         state_data = no_update
-    # elif triggered_id=='chart-3':
-    #     dff = chart_filter(dff, chart3_data, triggered_id, state_of_slider)
-    #     figg1, figg2, figg3, figg4 = chart_funtion(dff)
-    #     filter_value = no_update
-    #     state_data = no_update
-    # elif triggered_id=='chart-4':
-    #     dff = chart_filter(dff, chart4_data, triggered_id, state_of_slider)
-    #     figg1, figg2, figg3, figg4 = chart_funtion(dff)
-    #     filter_value = no_update
-    #     state_data = no_update
-    # elif triggered_id=='reset-button':
-    #     figg1, figg2, figg3, figg4 = chart_funtion(dff)
-    #     filter_value = no_update
-    #     state_data = None
-
-    # else:
-    #     # dff = df
-    #     dff= chart_filter(dff, None ,triggered_id, state_of_slider)
-    #     figg1, figg2, figg3, figg4 = chart_funtion(dff)
-       
-    #     filter_value = no_update
-    #     state_data = state_data
-    
-    dff, state_data = chart_filter(dff, chart1_state, chart3_state, chart4_state, triggered_id, state_of_slider, state_data,   True)
-    figg1, figg2, figg3, figg4 = chart_funtion(dff)
+    dff = pd.DataFrame(master_data)
+    dff, state_data = data_filter(dff, chart1_state, chart3_state, chart4_state, triggered_id, slider_filter_state, state_data,   True)
+    figg1, figg2, figg3, figg4 = chart_bulilder(dff)
     filter_value = no_update
-    # state_data = no_update
-
     dff =  dff.to_dict('records')
 
-
-
-
     return figg1, figg2, figg3, figg4, dff, filter_value, state_data
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
