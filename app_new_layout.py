@@ -97,7 +97,9 @@ BODY = dbc.Container(
             dash_table.DataTable(
                 id='table-data',
                 columns=[{'name': i, 'id': i} for i in ['TITLE', 'VIEWCOUNT', 'LIKECOUNT', 'COMMENTCOUNT', 'PUBLISHED_PERIOD', 'DAY_OF_WEEK_NAME', 'CATEGORY_TITLE']],
-                page_size=50
+                page_size=50,
+                filter_action= 'native',
+                sort_action= 'native'
 
                 )
         )
@@ -106,6 +108,7 @@ BODY = dbc.Container(
     ],fluid=True
 
 )
+
 
 
 
@@ -118,7 +121,8 @@ def chart_bulilder(dff):
     ## Chart 1 
     # df1 = dff.groupby(['YEAR_MONTH'])['YEAR_MONTH'].describe()['count'].reset_index().sort_values(by="YEAR_MONTH", ascending=True)
     df1 = dff.groupby('YEAR_MONTH')['YEAR_MONTH'].count().reset_index(name='count').sort_values(by="YEAR_MONTH", ascending=True)
-    fig1 = px.line(df1, x= 'YEAR_MONTH', y= 'count', markers=True)
+    fig1 = px.line(df1, x= 'YEAR_MONTH', y= 'count', markers=True, text= 'count')
+    fig1.update_traces(textposition="top right", line=dict(color='firebrick', width=4))
 
     #Chart 2 
     df2 = dff.groupby(["CATEGORY_TITLE"]).aggregate({"VIEWCOUNT": 'mean',"LIKECOUNT": ['mean', 'count']}).reset_index()
@@ -135,9 +139,11 @@ def chart_bulilder(dff):
     return fig1, fig2, fig3, fig4
 
 
-def data_filter(dff, chart1_state, chart3_state, chart4_state , trigger_id, filter_1, state_data, is_month = False):
+
+def data_filter(dff, chart1_state, chart3_state, chart4_state , trigger_id, slider_filter_state, dropdown_filter_state, state_data, is_month = False):
     
-    dff = dff[(dff['VIDEO_TIME']>= filter_1[0]) & (dff['VIDEO_TIME']<= filter_1[1])]
+    dff = dff[(dff['VIDEO_TIME']>= slider_filter_state[0]) & (dff['VIDEO_TIME']<= slider_filter_state[1])]
+    dff = dff[dff['CATEGORY_TITLE'].isin(dropdown_filter_state)]
     state_data = state_data if state_data is not None else {}
 
     if trigger_id is not None and trigger_id != 'reset-button':
@@ -174,6 +180,7 @@ def data_filter(dff, chart1_state, chart3_state, chart4_state , trigger_id, filt
     Output('table-data', 'data'),
     Output('slider-filter', 'value'),
     Output('state-data', 'data'),
+    Output('dropdown-filter', 'value'),
     
     Input('chart-1', 'clickData'),
     Input('chart-3', 'clickData'),
@@ -185,22 +192,24 @@ def data_filter(dff, chart1_state, chart3_state, chart4_state , trigger_id, filt
     Input('state-data', 'data'),
 
     State('slider-filter', 'value'),
+    State('dropdown-filter', 'value'),
     State('chart-1', 'clickData'),
     State('chart-3', 'clickData'),
     State('chart-4', 'clickData'),
 )
 
 
-def update_all(chart1_data, chart3_data, chart4_data, rest_button, master_data, slider_filter, dropdown_filter, state_data, slider_filter_state, chart1_state, chart3_state, chart4_state ):
+def update_all(chart1_data, chart3_data, chart4_data, rest_button, master_data, slider_filter, dropdown_filter, state_data, slider_filter_state, dropdown_filter_state, chart1_state, chart3_state, chart4_state ):
 
     triggered_id = ctx.triggered_id
     dff = pd.DataFrame(master_data)
-    dff, state_data = data_filter(dff, chart1_state, chart3_state, chart4_state, triggered_id, slider_filter_state, state_data,   True)
+    dff, state_data = data_filter(dff, chart1_state, chart3_state, chart4_state, triggered_id, slider_filter_state, dropdown_filter_state, state_data, True)
     figg1, figg2, figg3, figg4 = chart_bulilder(dff)
     filter_value = no_update
+    filter2_value = no_update
     dff =  dff.to_dict('records')
 
-    return figg1, figg2, figg3, figg4, dff, filter_value, state_data
+    return figg1, figg2, figg3, figg4, dff, filter_value, state_data, filter2_value
 
 
 
@@ -211,6 +220,14 @@ if __name__ == '__main__':
 
 
 ### To do 
+# Dodac 4 kafelki na środku ze stats: średni czas filmu, srednie like, średnie comentarze,  wyswietlenia 
+# dodaj w filtrach kalendarz 
+# chart1 - poprawić miesiace - żeby były wszysktie 
+# zaokreąglone ramki chartów + białe tła wykresów z pojedynczymi paskami 
+#charty - wyrazne tytuły lewy góy róg 
+#szare tło + białe kafelki 
+
+
 # 1) w funkcji chart_filter dodac w parametrach state_data 
 # w poszczegolnych pozycjac sprawdzac stany np. State_data.get{}, jezeli rozne od 0 to korzystaj 
 # 2) dodac zmiane system state w przypadku restetu! S 
