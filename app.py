@@ -231,5 +231,3 @@ if __name__ == '__main__':
 # 1) w funkcji chart_filter dodac w parametrach state_data 
 # w poszczegolnych pozycjac sprawdzac stany np. State_data.get{}, jezeli rozne od 0 to korzystaj 
 # 2) dodac zmiane system state w przypadku restetu! S 
-
-##New commnet 24.10
