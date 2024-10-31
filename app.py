@@ -11,22 +11,22 @@ df = pd.read_csv('data/dashboard_data/youtube_data_dashboard.csv')
 external_stylesheets = [dbc.themes.COSMO]
 
 
-NAVBAR = dbc.Navbar(
-    children=[
-        # Use row and col to control vertical alignment of logo / brand
-        dbc.Row(
-            [
-                dbc.Col(html.Img(src=YOUTUBE_LOGO, height="60px")),
-                dbc.Col("Dashboad"),
-                dbc.Col("Repository")
-            ],
-            align="center"
-        )
-    ],
-    color="gray",
-    dark=True,
-    sticky="top",
-)
+# NAVBAR = dbc.Navbar(
+#     children=[
+#         # Use row and col to control vertical alignment of logo / brand
+#         dbc.Row(
+#             [
+#                 dbc.Col(html.Img(src=YOUTUBE_LOGO, height="60px")),
+#                 dbc.Col("Dashboad"),
+#                 dbc.Col("Repository")
+#             ],
+#             align="center"
+#         )
+#     ],
+#     color="gray",
+#     dark=True,
+#     sticky="top",
+# )
 
 
 FILTER_CARD =[
@@ -71,41 +71,94 @@ BODY = dbc.Container(
     ##Filter
     dbc.Row(
         [
-            dbc.Col(dbc.Card(FILTER_CARD, color='light') , md=2),
+            dbc.Col(
+                [
+                    dbc.Row(
+                        html.Div(html.Img(src=YOUTUBE_LOGO, height="60px"))
+                    ),
+                    dbc.Row(
+                        html.Div('Comment')
+                    ),
+                    dbc.Row(
+                        [
+                            dbc.Col('Button'),
+                            dbc.Col('Button'),
+                            dbc.Col('Button')
+                        ]
+                    ),
+                    dbc.Row( dbc.Card(FILTER_CARD, color='light'))
+                ],
+                md=2
+            ),
             dbc.Col(
                 [
                     dbc.Row(
                         [
-                            dbc.Col(dcc.Graph(id='chart-1',config={"displayModeBar": False}), md=6),
-                            dbc.Col(dcc.Graph(id='chart-2',config={"displayModeBar": False}), md=6)
-                        ]
-                            ),
+                            dbc.Col('Stats', className='py-3 mx-3 my-5 w-5 border rounded-3'),
+                            dbc.Col('Stats', className='bg-danger'),
+                            dbc.Col('Stats', className='bg-danger'),
+                            dbc.Col('Stats', className='bg-danger')
+                        ],
+                        className= 'bg-info  g-2 my-2'
+                    
+                    ),
                     dbc.Row(
-                            [
-                            dbc.Col(dcc.Graph(id='chart-3',config={"displayModeBar": False}), md=6),
-                            dbc.Col(dcc.Graph(id='chart-4',config={"displayModeBar": False}), md=6)
-                            ]
-                             )
+                        [
+                            dbc.Col(dcc.Graph(id='chart-1',config={"displayModeBar": False}) ),
+                            dbc.Col(dcc.Graph(id='chart-2',config={"displayModeBar": False}) ),
+                            dbc.Col(dcc.Graph(id='chart-3',config={"displayModeBar": False}) ),
+                            dbc.Col(dcc.Graph(id='chart-4',config={"displayModeBar": False}))
+                            ],
+                            className= 'g-3 row-cols-2 my-2'
+                             ),
+                             
+                    dbc.Row(
+                        dbc.Col(
+                            html.Div(
+                                dash_table.DataTable(
+                                    id='table-data',
+                                    columns=[{'name': i, 'id': i} for i in ['TITLE', 'VIEWCOUNT', 'LIKECOUNT', 'COMMENTCOUNT', 'PUBLISHED_PERIOD', 'DAY_OF_WEEK_NAME', 'CATEGORY_TITLE']],
+                                    page_size=50,
+                                    filter_action= 'native',
+                                    sort_action= 'native',
+                                    style_data= {
+                                        'whiteSpace':'normal',
+                                        'height': 'auto'
+                                    },
+                                    sort_by=[{"column_id": "VIEWCOUNT", "direction": "desc"}]
+                                    # fixed_rows={'headers': True, 'data':0}
+
+                                    )
+                                ),
+                             className='justify-content-center my-2'
+                            ),
+                    )
                 ],
-                md=10
+                md=10, className= 'my-3 border-danger'
             )
         ],
-         style={"marginTop": 30}
+        #  style={"marginTop": 30}
+        className='mb-4'
     ),
-    dbc.Row(
-        html.Div(
-            dash_table.DataTable(
-                id='table-data',
-                columns=[{'name': i, 'id': i} for i in ['TITLE', 'VIEWCOUNT', 'LIKECOUNT', 'COMMENTCOUNT', 'PUBLISHED_PERIOD', 'DAY_OF_WEEK_NAME', 'CATEGORY_TITLE']],
-                page_size=50,
-                filter_action= 'native',
-                sort_action= 'native'
+   
+    # dbc.Row(
+    #     dbc.Col(
+    #         html.Div(
+    #         dash_table.DataTable(
+    #             id='table-data',
+    #             columns=[{'name': i, 'id': i} for i in ['TITLE', 'VIEWCOUNT', 'LIKECOUNT', 'COMMENTCOUNT', 'PUBLISHED_PERIOD', 'DAY_OF_WEEK_NAME', 'CATEGORY_TITLE']],
+    #             page_size=50,
+    #             filter_action= 'native',
+    #             sort_action= 'native'
 
-                )
-        )
-    )
+    #             )
+    #         )
+    #     )
+        
+    # )
 
-    ],fluid=True
+    ],fluid=True,
+     className= "bg-light"
 
 )
 
@@ -114,7 +167,8 @@ BODY = dbc.Container(
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
-app.layout = html.Div(children=[NAVBAR, BODY])
+# app.layout = html.Div(children=[NAVBAR, BODY])
+app.layout = html.Div(children=[BODY])
 
 
 def chart_bulilder(dff):
