@@ -30,7 +30,7 @@ external_stylesheets = [dbc.themes.COSMO]
 
 
 FILTER_CARD =[
-    dbc.CardHeader(html.H5("Filters", className="display-6 card-title")),
+    dbc.CardHeader(html.H5("Filters", className="card-title")),
     dbc.CardBody(
         [
         dbc.Row(
@@ -74,7 +74,8 @@ BODY = dbc.Container(
             dbc.Col(
                 [
                     dbc.Row(
-                        html.Div(html.Img(src=YOUTUBE_LOGO, height="60px"))
+                        html.Div(html.Img(src=YOUTUBE_LOGO, height="40px")),
+                        className='mt-3'
                     ),
                     dbc.Row(
                         html.Div('Comment')
@@ -88,28 +89,78 @@ BODY = dbc.Container(
                     ),
                     dbc.Row( dbc.Card(FILTER_CARD, color='light'))
                 ],
-                md=2
+                md=2,
+                # className= 'mx-2'
             ),
             dbc.Col(
                 [
                     dbc.Row(
                         [
-                            dbc.Col('Stats', className='py-3 mx-3 my-5 w-5 border rounded-3'),
-                            dbc.Col('Stats', className='bg-danger'),
-                            dbc.Col('Stats', className='bg-danger'),
-                            dbc.Col('Stats', className='bg-danger')
+                            dbc.Col(
+                                    dbc.Card(
+                                        dbc.CardBody([
+                                            html.H6("Number of videos", className="card-title text-muted"),
+                                            html.H2("$10,499.93", className="card-text fw-bold"),
+                                        ]),
+                                        className="shadow-sm my-2"
+                                    ),
+                                    width=3,
+                                 
+                                    ),
+                            dbc.Col(
+                                    dbc.Card(
+                                        dbc.CardBody([
+                                            html.H6("Average number of views", className="card-title text-muted"),
+                                            html.H2("$10,499.93", className="card-text fw-bold"),
+                                        ]),
+                                        className="shadow-sm my-2"
+                                    ),
+                                    width=3,
+                                 
+                                    ),
+                            dbc.Col(
+                                    dbc.Card(
+                                        dbc.CardBody([
+                                            html.H6("Average number of comments", className="card-title text-muted"),
+                                            html.H2("$10,499.93", className="card-text fw-bold"),
+                                        ]),
+                                        className="shadow-sm my-2"
+                                    ),
+                                    width=3,
+                                  
+                                    ),
+                            dbc.Col(
+                                    dbc.Card(
+                                        dbc.CardBody([
+                                            html.H6("Average number of likes", className="card-title text-muted"),
+                                            html.H2("$10,499.93", className="card-text fw-bold"),
+                                        ]),
+                                        className="shadow-sm my-2"
+                                    ),
+                                    width=3,
+                                   
+                                    )
                         ],
-                        className= 'bg-info  g-2 my-2'
+                        className= 'g-2 my-4'
                     
                     ),
                     dbc.Row(
                         [
-                            dbc.Col(dcc.Graph(id='chart-1',config={"displayModeBar": False}) ),
-                            dbc.Col(dcc.Graph(id='chart-2',config={"displayModeBar": False}) ),
-                            dbc.Col(dcc.Graph(id='chart-3',config={"displayModeBar": False}) ),
-                            dbc.Col(dcc.Graph(id='chart-4',config={"displayModeBar": False}))
+                            dbc.Col(dcc.Graph(id='chart-1',config={"displayModeBar": False}),className='shadow-sm border rounded-3 mx-2 mb-4'  ),
+                            dbc.Col(dcc.Graph(id='chart-2',config={"displayModeBar": False}), className='shadow-sm border rounded-3 mx-2 mb-4')
+                            # dbc.Col(dcc.Graph(id='chart-3',config={"displayModeBar": False}),width=3, className='border border-secondary rounded-3 mx-3'  ),
+                            # dbc.Col(dcc.Graph(id='chart-4',config={"displayModeBar": False}),width=3, className='border border-secondary rounded-3 mx-3' )
                             ],
-                            className= 'g-3 row-cols-2 my-2'
+                            # className= ''
+                             ),
+                    dbc.Row(
+                        [
+                            # dbc.Col(dcc.Graph(id='chart-1',config={"displayModeBar": False}),width=3, className='border border-secondary rounded-3 mx-3' ),
+                            # dbc.Col(dcc.Graph(id='chart-2',config={"displayModeBar": False}),width=3, className='border border-secondary rounded-3 mx-3'  ),
+                            dbc.Col(dcc.Graph(id='chart-3',config={"displayModeBar": False}), className='shadow-sm border  rounded-3  mx-2 mb-4'  ),
+                            dbc.Col(dcc.Graph(id='chart-4',config={"displayModeBar": False}), className='shadow-sm border  rounded-3  mx-2 mb-4' )
+                            ],
+                            # className= 'row-cols-2 mb-4'
                              ),
                              
                     dbc.Row(
@@ -138,7 +189,7 @@ BODY = dbc.Container(
             )
         ],
         #  style={"marginTop": 30}
-        className='mb-4'
+        className='gx-5'
     ),
    
     # dbc.Row(
