@@ -8,7 +8,7 @@ YOUTUBE_LOGO ='https://upload.wikimedia.org/wikipedia/commons/b/b8/YouTube_Logo_
 df = pd.read_csv('data/dashboard_data/youtube_data_dashboard.csv')
 
 
-external_stylesheets = [dbc.themes.COSMO]
+external_stylesheets = [dbc.themes.COSMO, dbc.icons.BOOTSTRAP]
 
 
 # NAVBAR = dbc.Navbar(
@@ -30,38 +30,49 @@ external_stylesheets = [dbc.themes.COSMO]
 
 
 FILTER_CARD =[
-    dbc.CardHeader(html.H5("Filters", className="card-title")),
+    # dbc.CardHeader(html.H4("Filters", className="card-title")),
     dbc.CardBody(
         [
-        dbc.Row(
-            [
-            dbc.Col(
-                [
+        #dbc.Row(
+           # [
+            #dbc.Col(
+             #   [
                     html.Div(dcc.Store(id='master-data',data= df.to_dict('records'))),
                     # html.Div(dcc.Store(id='state-data', data= {'State': 1})),
                     html.Div(dcc.Store(id='state-data')),
-                    html.Button("Reset Selection", id='reset-button', n_clicks=0),
-                    html.Div("Duration of video (minutes)"),
-                    html.Div(
+                    # html.Button("Reset Selection", id='reset-button', n_clicks=0),
+                    html.H4("Filters"),
+                    html.Div([
+                        html.H6("Duration of video (minutes)"),
                         dcc.RangeSlider(
                         min=df['VIDEO_TIME'].min(),
                         max=df['VIDEO_TIME'].max(),
-                        step=50,
+                        # step=1,
+                        tooltip={"placement": "bottom", "always_visible": True},
+                        allowCross=False,
+                        marks=None, 
                         id='slider-filter',
                         value=[df['VIDEO_TIME'].min(), df['VIDEO_TIME'].max()],
-                        )),
-                    html.Div("Categories"),
-                    html.Div(
+                        )],
+                        className='mb-3'
+                        ),
+                    html.Div([
+                        html.H6("Categories"),
                         dcc.Dropdown(
                         options= df['CATEGORY_TITLE'].unique(),
                         value= df['CATEGORY_TITLE'].unique(),
                         multi=True,
                         id= 'dropdown-filter'
-                        )
+                        )],
+                        className='mb-3'
                     )
-                ]
-            )]
-        )]
+              #  ]
+           # )
+           # ]
+        #)
+        ],
+        className='mb-1'
+        
     )
 ]
 
@@ -75,22 +86,20 @@ BODY = dbc.Container(
                 [
                     dbc.Row(
                         html.Div(html.Img(src=YOUTUBE_LOGO, height="40px")),
-                        className='mt-3'
+                        className='my-3'
                     ),
                     dbc.Row(
-                        html.Div('Comment')
+                        html.Div('Analyse your favourite channel statistics'),
+                        className= 'fst-italic fs-4 my-4'
                     ),
+                    
                     dbc.Row(
-                        [
-                            dbc.Col('Button'),
-                            dbc.Col('Button'),
-                            dbc.Col('Button')
-                        ]
-                    ),
-                    dbc.Row( dbc.Card(FILTER_CARD, color='light'))
+                        dbc.Card(FILTER_CARD, color='light')
+                        #    FILTER_CARD
+                        )
+                   
                 ],
-                md=2,
-                # className= 'mx-2'
+                md=2
             ),
             dbc.Col(
                 [
@@ -187,9 +196,9 @@ BODY = dbc.Container(
                 ],
                 md=10, className= 'my-3 border-danger'
             )
-        ],
+        ]
         #  style={"marginTop": 30}
-        className='gx-5'
+        # className='gx-1 '
     ),
    
     # dbc.Row(
@@ -251,7 +260,7 @@ def data_filter(dff, chart1_state, chart3_state, chart4_state , trigger_id, slid
     dff = dff[dff['CATEGORY_TITLE'].isin(dropdown_filter_state)]
     state_data = state_data if state_data is not None else {}
 
-    if trigger_id is not None and trigger_id != 'reset-button':
+    if trigger_id is not None: #and trigger_id != 'reset-button':
 
         if trigger_id in state_data:
             state_data.pop(trigger_id)      
@@ -290,7 +299,7 @@ def data_filter(dff, chart1_state, chart3_state, chart4_state , trigger_id, slid
     Input('chart-1', 'clickData'),
     Input('chart-3', 'clickData'),
     Input('chart-4', 'clickData'),
-    Input('reset-button', 'n_clicks'),
+    # Input('reset-button', 'n_clicks'),
     Input('master-data', 'data'),
     Input('slider-filter', 'value'),
     Input('dropdown-filter', 'value'),
@@ -304,7 +313,7 @@ def data_filter(dff, chart1_state, chart3_state, chart4_state , trigger_id, slid
 )
 
 
-def update_all(chart1_data, chart3_data, chart4_data, rest_button, master_data, slider_filter, dropdown_filter, state_data, slider_filter_state, dropdown_filter_state, chart1_state, chart3_state, chart4_state ):
+def update_all(chart1_data, chart3_data, chart4_data, master_data, slider_filter, dropdown_filter, state_data, slider_filter_state, dropdown_filter_state, chart1_state, chart3_state, chart4_state ):
 
     triggered_id = ctx.triggered_id
     dff = pd.DataFrame(master_data)
