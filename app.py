@@ -8,7 +8,7 @@ YOUTUBE_LOGO ='https://upload.wikimedia.org/wikipedia/commons/b/b8/YouTube_Logo_
 df = pd.read_csv('data/dashboard_data/youtube_data_dashboard.csv')
 
 
-external_stylesheets = [dbc.themes.COSMO, dbc.icons.BOOTSTRAP]
+external_stylesheets = [dbc.themes.BOOTSTRAP, "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.7.2/font/bootstrap-icons.min.css"]
 
 
 # NAVBAR = dbc.Navbar(
@@ -109,7 +109,14 @@ BODY = dbc.Container(
                                     dbc.Card(
                                         dbc.CardBody([
                                             html.H6("Number of videos", className="card-title text-muted"),
-                                            html.H2("$10,499.93", className="card-text fw-bold"),
+                                            # html.H2("$10,499.93", className="card-text fw-bold"),
+                                            dbc.Row(
+                                                [
+                                                    dbc.Col(html.I(className="bi-camera-video")),  # Icon column
+                                                    dbc.Col(html.H2("10,499", className="card-text fw-bold"))   # Number column
+                                                ],
+                                                className="align-items-center"  # Vertically align icon and number
+                                            ),
                                         ]),
                                         className="shadow-sm my-2"
                                     ),
@@ -120,7 +127,13 @@ BODY = dbc.Container(
                                     dbc.Card(
                                         dbc.CardBody([
                                             html.H6("Average number of views", className="card-title text-muted"),
-                                            html.H2("$10,499.93", className="card-text fw-bold"),
+                                             dbc.Row(
+                                                [
+                                                    dbc.Col(html.I(className="bi bi-eye-fill")),  # Icon column
+                                                    dbc.Col(html.H2("10,499", className="card-text fw-bold"))   # Number column
+                                                ],
+                                                className="align-items-center"  # Vertically align icon and number
+                                            ),
                                         ]),
                                         className="shadow-sm my-2"
                                     ),
@@ -131,7 +144,13 @@ BODY = dbc.Container(
                                     dbc.Card(
                                         dbc.CardBody([
                                             html.H6("Average number of comments", className="card-title text-muted"),
-                                            html.H2("$10,499.93", className="card-text fw-bold"),
+                                            dbc.Row(
+                                                [
+                                                    dbc.Col(html.I(className="bi bi-chat-left-text-fill")),  # Icon column
+                                                    dbc.Col(html.H2("10,499", className="card-text fw-bold"))   # Number column
+                                                ],
+                                                className="align-items-center"  # Vertically align icon and number
+                                            ),
                                         ]),
                                         className="shadow-sm my-2"
                                     ),
@@ -142,7 +161,13 @@ BODY = dbc.Container(
                                     dbc.Card(
                                         dbc.CardBody([
                                             html.H6("Average number of likes", className="card-title text-muted"),
-                                            html.H2("$10,499.93", className="card-text fw-bold"),
+                                             dbc.Row(
+                                                [
+                                                    dbc.Col(html.I(className="bi bi-hand-thumbs-up-fill")),  # Icon column
+                                                    dbc.Col(html.H2("10,499", className="card-text fw-bold"))   # Number column
+                                                ],
+                                                className="align-items-center"  # Vertically align icon and number
+                                            ),
                                         ]),
                                         className="shadow-sm my-2"
                                     ),
@@ -225,7 +250,7 @@ BODY = dbc.Container(
 
 
 
-app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+app = Dash(__name__, external_stylesheets= external_stylesheets)
 
 # app.layout = html.Div(children=[NAVBAR, BODY])
 app.layout = html.Div(children=[BODY])
