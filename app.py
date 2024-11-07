@@ -174,28 +174,38 @@ BODY = dbc.Container(
                                     width=3,
                                    
                                     )
+                                
                         ],
-                        className= 'g-2 my-4'
+                        className= 'my-4'
                     
                     ),
-                    dbc.Row(
-                        [
-                            dbc.Col(dcc.Graph(id='chart-1',config={"displayModeBar": False}),className='shadow-sm border rounded-3 mx-2 mb-4'  ),
-                            dbc.Col(dcc.Graph(id='chart-2',config={"displayModeBar": False}), className='shadow-sm border rounded-3 mx-2 mb-4')
-                            # dbc.Col(dcc.Graph(id='chart-3',config={"displayModeBar": False}),width=3, className='border border-secondary rounded-3 mx-3'  ),
-                            # dbc.Col(dcc.Graph(id='chart-4',config={"displayModeBar": False}),width=3, className='border border-secondary rounded-3 mx-3' )
+                    # dbc.Row(
+                    #     [
+                    #         dbc.Col(dcc.Graph(id='chart-1',config={"displayModeBar": False}),className='shadow-sm border rounded-3 mx-2 mb-4'  ),
+                    #         dbc.Col(dcc.Graph(id='chart-2',config={"displayModeBar": False}), className='shadow-sm border rounded-3 mx-2 mb-4')
+                    #         # dbc.Col(dcc.Graph(id='chart-3',config={"displayModeBar": False}),width=3, className='border border-secondary rounded-3 mx-3'  ),
+                    #         # dbc.Col(dcc.Graph(id='chart-4',config={"displayModeBar": False}),width=3, className='border border-secondary rounded-3 mx-3' )
+                    #         ],
+                    #         # className= ''
+                    #          ),
+                    # dbc.Row(
+                    #     [
+                    #         # dbc.Col(dcc.Graph(id='chart-1',config={"displayModeBar": False}),width=3, className='border border-secondary rounded-3 mx-3' ),
+                    #         # dbc.Col(dcc.Graph(id='chart-2',config={"displayModeBar": False}),width=3, className='border border-secondary rounded-3 mx-3'  ),
+                    #         dbc.Col(dcc.Graph(id='chart-3',config={"displayModeBar": False}), className='shadow-sm border  rounded-3  mx-2 mb-4'  ),
+                    #         dbc.Col(dcc.Graph(id='chart-4',config={"displayModeBar": False}), className='shadow-sm border  rounded-3  mx-2 mb-4' )
+                    #         ],
+                    #         # className= 'row-cols-2 mb-4'
+                    #          ),
+                     dbc.Row(
+                            [
+                                dbc.Col(dcc.Graph(id='chart-1', config={"displayModeBar": False}), className='shadow-sm border rounded-3'),
+                                dbc.Col(dcc.Graph(id='chart-2', config={"displayModeBar": False}), className='shadow-sm border rounded-3'),
+                                dbc.Col(dcc.Graph(id='chart-3', config={"displayModeBar": False}), className='shadow-sm border rounded-3'),
+                                dbc.Col(dcc.Graph(id='chart-4', config={"displayModeBar": False}), className='shadow-sm border rounded-3')
                             ],
-                            # className= ''
-                             ),
-                    dbc.Row(
-                        [
-                            # dbc.Col(dcc.Graph(id='chart-1',config={"displayModeBar": False}),width=3, className='border border-secondary rounded-3 mx-3' ),
-                            # dbc.Col(dcc.Graph(id='chart-2',config={"displayModeBar": False}),width=3, className='border border-secondary rounded-3 mx-3'  ),
-                            dbc.Col(dcc.Graph(id='chart-3',config={"displayModeBar": False}), className='shadow-sm border  rounded-3  mx-2 mb-4'  ),
-                            dbc.Col(dcc.Graph(id='chart-4',config={"displayModeBar": False}), className='shadow-sm border  rounded-3  mx-2 mb-4' )
-                            ],
-                            # className= 'row-cols-2 mb-4'
-                             ),
+                            className='row row-cols-1 row-cols-md-2 row-cols-lg-2 my-4 g-3 '),
+                            
                              
                     dbc.Row(
                         dbc.Col(
@@ -219,11 +229,13 @@ BODY = dbc.Container(
                             ),
                     )
                 ],
-                md=10, className= 'my-3 border-danger'
+                md=10, 
+                # className= 'my-5'
             )
-        ]
+        ],
+
         #  style={"marginTop": 30}
-        # className='gx-1 '
+        className='mx-3'
     ),
    
     # dbc.Row(
@@ -260,20 +272,57 @@ def chart_bulilder(dff):
     ## Chart 1 
     # df1 = dff.groupby(['YEAR_MONTH'])['YEAR_MONTH'].describe()['count'].reset_index().sort_values(by="YEAR_MONTH", ascending=True)
     df1 = dff.groupby('YEAR_MONTH')['YEAR_MONTH'].count().reset_index(name='count').sort_values(by="YEAR_MONTH", ascending=True)
-    fig1 = px.line(df1, x= 'YEAR_MONTH', y= 'count', markers=True, text= 'count')
-    fig1.update_traces(textposition="top right", line=dict(color='firebrick', width=4))
+    fig1 = px.line(df1, x= 'YEAR_MONTH', y= 'count', markers=True, text= 'count', template= 'plotly_white')
+    fig1.update_traces(textposition="top right", line=dict(color='firebrick', width=3), line_shape='spline')
+    fig1.update_layout(title='Number of published videos',
+                   xaxis_title='Month',
+                   yaxis_title='Number of movies',
+                   barmode='group', 
+                   xaxis_tickangle=-45)
+  
 
     #Chart 2 
     df2 = dff.groupby(["CATEGORY_TITLE"]).aggregate({"VIEWCOUNT": 'mean',"LIKECOUNT": ['mean', 'count']}).reset_index()
     df2.columns = ['_'.join(col).strip('_') for col in df2.columns]
-    fig2 = px.scatter(df2, x = 'VIEWCOUNT_mean', y= 'LIKECOUNT_mean',size= 'LIKECOUNT_count', color='CATEGORY_TITLE')
+    df2.columns = ['Category', 'Average of views', 'Average of likes','Number of movies']
+    ##Text in hover
+    # hover_text_chart2 = []
+    # for index, row in df2.iterrows():
+    #     hover_text_chart2.append(('Category: {category}<br>'+
+    #                             'Average of views: {views_mean}<br>'+
+    #                             'Average of likes: {likes_mean}<br>'+
+    #                             'Number of movies: {movies_number}<br>').format(category = row['CATEGORY_TITLE'],
+    #                                                                             views_mean = row['VIEWCOUNT_mean'],
+    #                                                                             likes_mean = row['LIKECOUNT_mean'],
+    #                                                                             movies_number = row['LIKECOUNT_count']
+    #                                                                             ))
+    # df2['text'] = hover_text_chart2
+
+    sizeref = 2.*(df2['Number of movies'].max())/(100**2)    
+    fig2 = px.scatter(df2, x = 'Average of views', y= 'Average of likes',size= 'Number of movies', color='Category', template= 'plotly_white')
+    fig2.update_traces(marker=dict(sizemode='area', sizeref=sizeref, line_width=2))
+    fig2.update_layout(title='Category statistics',
+                   xaxis_title='Avg. number of views',
+                   yaxis_title='Avg. number of likes')
+    
+ 
 
     #Chart 3 
-    df3 = dff.groupby(['DAY_OF_WEEK_NAME','PUBLISHED_PERIOD']).size().reset_index(name='COUNT')
-    fig3 = px.bar(df3, x='DAY_OF_WEEK_NAME', y='COUNT', color='PUBLISHED_PERIOD')
+    df3 = dff.groupby(['DAY_OF_WEEK_NAME','PUBLISHED_PERIOD','DAY_OF_WEEK_NUMBER']).size().reset_index(name='COUNT').sort_values(by= 'DAY_OF_WEEK_NUMBER')
+    fig3 = px.bar(df3, x='DAY_OF_WEEK_NAME', y='COUNT', color='PUBLISHED_PERIOD', template= 'plotly_white')
+    # fig3.update_traces(marker= dict(cornerradius="30%"))
+    fig3.update_layout(title='Day of video publication',
+                        xaxis_title='Day of week',
+                        yaxis_title='Number of movies'
+                       )
 
     #Chart 4
-    fig4 = px.box(dff, x='CATEGORY_TITLE', y='VIDEO_TIME')
+    fig4 = px.box(dff, x='CATEGORY_TITLE', y='VIDEO_TIME', template='plotly_white' )
+    # fig4.update_traces( boxpoints='all', jitter=0.5,)
+    fig4.update_layout(title='Statistics of video time',
+                        xaxis_title='Category',
+                        yaxis_title='Video time'
+                       )
 
     return fig1, fig2, fig3, fig4
 
@@ -370,3 +419,12 @@ if __name__ == '__main__':
 # 1) w funkcji chart_filter dodac w parametrach state_data 
 # w poszczegolnych pozycjac sprawdzac stany np. State_data.get{}, jezeli rozne od 0 to korzystaj 
 # 2) dodac zmiane system state w przypadku restetu! S 
+
+
+
+
+#Linki w tablei 
+# popraw wykresy 
+# DONE -----------------wykres bubble resize jak?
+# poprawy miesiace na wykres 1 
+# poraw wykres box plot na kropki
