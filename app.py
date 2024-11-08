@@ -41,7 +41,7 @@ FILTER_CARD =[
                     # html.Div(dcc.Store(id='state-data', data= {'State': 1})),
                     html.Div(dcc.Store(id='state-data')),
                     # html.Button("Reset Selection", id='reset-button', n_clicks=0),
-                    html.H4("Filters"),
+                    html.H4("Filters", className='mb-4'),
                     html.Div([
                         html.H6("Duration of video (minutes)"),
                         dcc.RangeSlider(
