@@ -11,11 +11,12 @@ df = pd.read_csv('data/dashboard_data/youtube_data_dashboard.csv')
 # grouped_df = df.groupby(['PUBLISHED_PERIOD']).size().reset_index(name='Count')
 # fig = px.bar(grouped_df, x='PUBLISHED_PERIOD', y='Count')
 
+# len(df)   df['VIEWCOUNT'].mean()  df['COMMENTCOUNT'].mean() df['LIKECOUNT'].mean()
 
-test = {}
+# print( 'https://www.youtube.com/watch?v=' + df['VIDEOID'])
 
+test = [ f'[{title}]({link})' for title, link in zip(df['TITLE'], ('https://www.youtube.com/watch?v=' + df['VIDEOID'])) ]
+        
 
+print([{'name': 'TITLE', 'id': 'TITLE', 'presentation': 'markdown'},{'name': i, 'id': i} for i in ['VIEWCOUNT', 'LIKECOUNT', 'COMMENTCOUNT', 'PUBLISHED_PERIOD', 'DAY_OF_WEEK_NAME', 'CATEGORY_TITLE']])
 
-
-print('test' in test)
- 

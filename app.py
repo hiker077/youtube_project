@@ -6,6 +6,9 @@ import pandas as pd
 
 YOUTUBE_LOGO ='https://upload.wikimedia.org/wikipedia/commons/b/b8/YouTube_Logo_2017.svg'
 df = pd.read_csv('data/dashboard_data/youtube_data_dashboard.csv')
+df['TITLE'] = [
+    f'[{title}]({link})' for title, link in zip(df['TITLE'], ('https://www.youtube.com/watch?v=' + df['VIDEOID'])) 
+    ]
 
 
 external_stylesheets = [dbc.themes.BOOTSTRAP, "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.7.2/font/bootstrap-icons.min.css"]
@@ -112,8 +115,8 @@ BODY = dbc.Container(
                                             # html.H2("$10,499.93", className="card-text fw-bold"),
                                             dbc.Row(
                                                 [
-                                                    dbc.Col(html.I(className="bi-camera-video")),  # Icon column
-                                                    dbc.Col(html.H2("10,499", className="card-text fw-bold"))   # Number column
+                                                    dbc.Col(html.I(className="bi-camera-video"), style={"color": "red"}),  # Icon column
+                                                    dbc.Col(html.H2(id='number-of-videos', className="card-text fw-bold"))   # Number column
                                                 ],
                                                 className="align-items-center"  # Vertically align icon and number
                                             ),
@@ -129,8 +132,8 @@ BODY = dbc.Container(
                                             html.H6("Average number of views", className="card-title text-muted"),
                                              dbc.Row(
                                                 [
-                                                    dbc.Col(html.I(className="bi bi-eye-fill")),  # Icon column
-                                                    dbc.Col(html.H2("10,499", className="card-text fw-bold"))   # Number column
+                                                    dbc.Col(html.I(className="bi bi-eye-fill", style={"color": "red"})),  # Icon column
+                                                    dbc.Col(html.H2(id='avg-number-of-views', className="card-text fw-bold"))   # Number column
                                                 ],
                                                 className="align-items-center"  # Vertically align icon and number
                                             ),
@@ -146,10 +149,10 @@ BODY = dbc.Container(
                                             html.H6("Average number of comments", className="card-title text-muted"),
                                             dbc.Row(
                                                 [
-                                                    dbc.Col(html.I(className="bi bi-chat-left-text-fill")),  # Icon column
-                                                    dbc.Col(html.H2("10,499", className="card-text fw-bold"))   # Number column
+                                                    dbc.Col(html.I(className="bi bi-chat-left-text-fill"), style={"color": "red"}),  # Icon column
+                                                    dbc.Col(html.H2(id='avg-number-of-comments', className="card-text fw-bold"))   # Number column
                                                 ],
-                                                className="align-items-center"  # Vertically align icon and number
+                                                className="align-items-center"  # Vertically align icon and number  
                                             ),
                                         ]),
                                         className="shadow-sm my-2"
@@ -163,8 +166,8 @@ BODY = dbc.Container(
                                             html.H6("Average number of likes", className="card-title text-muted"),
                                              dbc.Row(
                                                 [
-                                                    dbc.Col(html.I(className="bi bi-hand-thumbs-up-fill")),  # Icon column
-                                                    dbc.Col(html.H2("10,499", className="card-text fw-bold"))   # Number column
+                                                    dbc.Col(html.I(className="bi bi-hand-thumbs-up-fill", style={"color": "red"})),  # Icon column
+                                                    dbc.Col(html.H2(id='avg-number-of-likes', className="card-text fw-bold"))   
                                                 ],
                                                 className="align-items-center"  # Vertically align icon and number
                                             ),
@@ -212,13 +215,26 @@ BODY = dbc.Container(
                             html.Div(
                                 dash_table.DataTable(
                                     id='table-data',
-                                    columns=[{'name': i, 'id': i} for i in ['TITLE', 'VIEWCOUNT', 'LIKECOUNT', 'COMMENTCOUNT', 'PUBLISHED_PERIOD', 'DAY_OF_WEEK_NAME', 'CATEGORY_TITLE']],
+                                    columns=[ #{'name': 'TITLE', 'id': 'TITLE', 'presentation': 'markdown'},
+                                        {'name': 'Video title', 'id': 'TITLE', 'presentation': 'markdown'},
+                                        {'name': 'Youtube category', 'id': 'CATEGORY_TITLE'},
+                                        {'name': 'Viws', 'id': 'VIEWCOUNT'},
+                                        {'name': 'Likes', 'id': 'LIKECOUNT'},
+                                        {'name': 'Comments', 'id': 'COMMENTCOUNT'},
+                                        {'name': 'Publishing time', 'id': 'PUBLISHED_PERIOD'},
+                                        {'name': 'Week day publishing', 'id': 'DAY_OF_WEEK_NAME'},
+
+                                        # {'name': i, 'id': i} for i in ['VIEWCOUNT', 'LIKECOUNT', 'COMMENTCOUNT', 'PUBLISHED_PERIOD', 'DAY_OF_WEEK_NAME', 'CATEGORY_TITLE']
+                                        ],
                                     page_size=50,
                                     filter_action= 'native',
                                     sort_action= 'native',
                                     style_data= {
                                         'whiteSpace':'normal',
                                         'height': 'auto'
+                                    },
+                                    style_header = {
+                                        'fontWeight': 'bold'
                                     },
                                     sort_by=[{"column_id": "VIEWCOUNT", "direction": "desc"}]
                                     # fixed_rows={'headers': True, 'data':0}
@@ -279,7 +295,6 @@ def chart_bulilder(dff):
                    yaxis_title='Number of movies',
                    barmode='group', 
                    xaxis_tickangle=-45)
-  
 
     #Chart 2 
     df2 = dff.groupby(["CATEGORY_TITLE"]).aggregate({"VIEWCOUNT": 'mean',"LIKECOUNT": ['mean', 'count']}).reset_index()
@@ -297,7 +312,6 @@ def chart_bulilder(dff):
     #                                                                             movies_number = row['LIKECOUNT_count']
     #                                                                             ))
     # df2['text'] = hover_text_chart2
-
     sizeref = 2.*(df2['Number of movies'].max())/(100**2)    
     fig2 = px.scatter(df2, x = 'Average of views', y= 'Average of likes',size= 'Number of movies', color='Category', template= 'plotly_white')
     fig2.update_traces(marker=dict(sizemode='area', sizeref=sizeref, line_width=2))
@@ -317,11 +331,12 @@ def chart_bulilder(dff):
                        )
 
     #Chart 4
-    fig4 = px.box(dff, x='CATEGORY_TITLE', y='VIDEO_TIME', template='plotly_white' )
+    fig4 = px.box(dff, x='CATEGORY_TITLE', y='VIDEO_TIME', template='plotly_white',  color='CATEGORY_TITLE')
     # fig4.update_traces( boxpoints='all', jitter=0.5,)
     fig4.update_layout(title='Statistics of video time',
                         xaxis_title='Category',
-                        yaxis_title='Video time'
+                        yaxis_title='Video time',
+                        showlegend = False
                        )
 
     return fig1, fig2, fig3, fig4
@@ -358,6 +373,17 @@ def data_filter(dff, chart1_state, chart3_state, chart4_state , trigger_id, slid
  
     return dff, state_data
 
+def kpis(df):
+
+    count = len(df)
+    views_mean = round(df['VIEWCOUNT'].mean(),0)
+    comment_mean= round(df['COMMENTCOUNT'].mean(),0)
+    like_mean = round(df['LIKECOUNT'].mean(),0)
+
+    return count, views_mean, comment_mean, like_mean
+
+
+
 
 
 @app.callback(
@@ -369,6 +395,11 @@ def data_filter(dff, chart1_state, chart3_state, chart4_state , trigger_id, slid
     Output('slider-filter', 'value'),
     Output('state-data', 'data'),
     Output('dropdown-filter', 'value'),
+    Output('number-of-videos', 'children'),
+    Output('avg-number-of-views', 'children'),
+    Output('avg-number-of-comments', 'children'),
+    Output('avg-number-of-likes', 'children'),
+
     
     Input('chart-1', 'clickData'),
     Input('chart-3', 'clickData'),
@@ -395,9 +426,10 @@ def update_all(chart1_data, chart3_data, chart4_data, master_data, slider_filter
     figg1, figg2, figg3, figg4 = chart_bulilder(dff)
     filter_value = no_update
     filter2_value = no_update
+    number_of_videos, avg_number_of_views, avg_number_of_comments, avg_number_of_likes  = kpis(dff)
     dff =  dff.to_dict('records')
-
-    return figg1, figg2, figg3, figg4, dff, filter_value, state_data, filter2_value
+    
+    return figg1, figg2, figg3, figg4, dff, filter_value, state_data, filter2_value, number_of_videos, avg_number_of_views, avg_number_of_comments, avg_number_of_likes
 
 
 
@@ -423,8 +455,7 @@ if __name__ == '__main__':
 
 
 
-#Linki w tablei 
+# DONE --- Linki w tablei 
 # popraw wykresy 
 # DONE -----------------wykres bubble resize jak?
-# poprawy miesiace na wykres 1 
-# poraw wykres box plot na kropki
+# LATER - poprawy miesiace na wykres 1 
