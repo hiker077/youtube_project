@@ -3,6 +3,7 @@ import plotly.express as px
 # import plotly.graph_objects as go
 import dash_bootstrap_components as dbc
 import pandas as pd
+from datetime import date, datetime, timedelta
 
 YOUTUBE_LOGO ='https://upload.wikimedia.org/wikipedia/commons/b/b8/YouTube_Logo_2017.svg'
 df = pd.read_csv('data/dashboard_data/youtube_data_dashboard.csv')
@@ -45,6 +46,18 @@ FILTER_CARD =[
                     html.Div(dcc.Store(id='state-data')),
                     # html.Button("Reset Selection", id='reset-button', n_clicks=0),
                     html.H4("Filters", className='mb-4'),
+                    html.Div([
+                        html.H6('Date', className='mb-3'),
+                        dcc.DatePickerRange(
+                            id='date-picker-range',
+                            month_format='DD/MM/YYYY',
+                            end_date_placeholder_text='DD/MM/YYYY',
+                            start_date= pd.to_datetime(df['PUBLISHEDAT']).dt.date.min(), #date.today() - timedelta(days=90),
+                            end_date=  pd.to_datetime(df['PUBLISHEDAT']).dt.date.max()
+                        ),
+                        ],
+                        className='mb-3'),
+
                     html.Div([
                         html.H6("Duration of video (minutes)"),
                         dcc.RangeSlider(
@@ -343,10 +356,16 @@ def chart_bulilder(dff):
 
 
 
-def data_filter(dff, chart1_state, chart3_state, chart4_state , trigger_id, slider_filter_state, dropdown_filter_state, state_data, is_month = False):
+def data_filter(dff, chart1_state, chart3_state, chart4_state , trigger_id, slider_filter_state, dropdown_filter_state, state_data,date_picker_start, date_picker_end, is_month = False):
     
+    dff['PUBLISHEDAT'] = pd.to_datetime(dff['PUBLISHEDAT'])
+    date_picker_start = datetime.strptime(date_picker_start, '%Y-%m-%d').date()
+    date_picker_end = datetime.strptime(date_picker_end, '%Y-%m-%d').date()
+
+    dff = dff.loc[(dff['PUBLISHEDAT'].dt.date>= date_picker_start ) & (dff['PUBLISHEDAT'].dt.date<= date_picker_end)]
     dff = dff[(dff['VIDEO_TIME']>= slider_filter_state[0]) & (dff['VIDEO_TIME']<= slider_filter_state[1])]
     dff = dff[dff['CATEGORY_TITLE'].isin(dropdown_filter_state)]
+    
     state_data = state_data if state_data is not None else {}
 
     if trigger_id is not None: #and trigger_id != 'reset-button':
@@ -372,6 +391,7 @@ def data_filter(dff, chart1_state, chart3_state, chart4_state , trigger_id, slid
         state_data = {}
  
     return dff, state_data
+
 
 def kpis(df):
 
@@ -400,15 +420,15 @@ def kpis(df):
     Output('avg-number-of-comments', 'children'),
     Output('avg-number-of-likes', 'children'),
 
-    
     Input('chart-1', 'clickData'),
     Input('chart-3', 'clickData'),
     Input('chart-4', 'clickData'),
-    # Input('reset-button', 'n_clicks'),
     Input('master-data', 'data'),
     Input('slider-filter', 'value'),
     Input('dropdown-filter', 'value'),
     Input('state-data', 'data'),
+    Input('date-picker-range', 'start_date'),
+    Input('date-picker-range', 'end_date'),
 
     State('slider-filter', 'value'),
     State('dropdown-filter', 'value'),
@@ -418,16 +438,17 @@ def kpis(df):
 )
 
 
-def update_all(chart1_data, chart3_data, chart4_data, master_data, slider_filter, dropdown_filter, state_data, slider_filter_state, dropdown_filter_state, chart1_state, chart3_state, chart4_state ):
+def update_all(chart1_data, chart3_data, chart4_data, master_data, slider_filter, dropdown_filter, state_data, date_picker_start, date_picker_end, slider_filter_state, dropdown_filter_state, chart1_state, chart3_state, chart4_state ):
 
     triggered_id = ctx.triggered_id
     dff = pd.DataFrame(master_data)
-    dff, state_data = data_filter(dff, chart1_state, chart3_state, chart4_state, triggered_id, slider_filter_state, dropdown_filter_state, state_data, True)
+    dff, state_data = data_filter(dff, chart1_state, chart3_state, chart4_state, triggered_id, slider_filter_state, dropdown_filter_state, state_data, date_picker_start, date_picker_end,   True)
     figg1, figg2, figg3, figg4 = chart_bulilder(dff)
     filter_value = no_update
     filter2_value = no_update
     number_of_videos, avg_number_of_views, avg_number_of_comments, avg_number_of_likes  = kpis(dff)
     dff =  dff.to_dict('records')
+    
     
     return figg1, figg2, figg3, figg4, dff, filter_value, state_data, filter2_value, number_of_videos, avg_number_of_views, avg_number_of_comments, avg_number_of_likes
 
@@ -440,22 +461,8 @@ if __name__ == '__main__':
 
 
 ### To do 
-# Dodac 4 kafelki na środku ze stats: średni czas filmu, srednie like, średnie comentarze,  wyswietlenia 
 # dodaj w filtrach kalendarz 
-# chart1 - poprawić miesiace - żeby były wszysktie 
-# zaokreąglone ramki chartów + białe tła wykresów z pojedynczymi paskami 
-#charty - wyrazne tytuły lewy góy róg 
-#szare tło + białe kafelki 
-
-
-# 1) w funkcji chart_filter dodac w parametrach state_data 
-# w poszczegolnych pozycjac sprawdzac stany np. State_data.get{}, jezeli rozne od 0 to korzystaj 
-# 2) dodac zmiane system state w przypadku restetu! S 
 
 
 
 
-# DONE --- Linki w tablei 
-# popraw wykresy 
-# DONE -----------------wykres bubble resize jak?
-# LATER - poprawy miesiace na wykres 1 
