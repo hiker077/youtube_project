@@ -3,10 +3,11 @@ import plotly.express as px
 import dash_bootstrap_components as dbc
 import pandas as pd
 from datetime import date, datetime, timedelta
+import os 
 
 YOUTUBE_LOGO ='https://upload.wikimedia.org/wikipedia/commons/b/b8/YouTube_Logo_2017.svg'
 EXTERNAL_STYLESHEETS = [dbc.themes.BOOTSTRAP, "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.7.2/font/bootstrap-icons.min.css"]
-
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 #Load and process data 
 def load_data(filepath: str) -> pd.DataFrame:
@@ -14,7 +15,7 @@ def load_data(filepath: str) -> pd.DataFrame:
     df['TITLE'] = [f'[{title}]({link})' for title, link in zip(df['TITLE'], ('https://www.youtube.com/watch?v=' + df['VIDEOID']))]
     return df 
 
-df = load_data('data/dashboard_data/youtube_data_dashboard.csv')
+df = load_data(os.path.join(BASE_DIR, 'youtube_project','data', 'data_processed','youtube_data_dashboard.csv'))
 
 #Helper functions
 def data_filter(dff, chart1_state, chart3_state, chart4_state , trigger_id, slider_filter_state, dropdown_filter_state, state_data,date_picker_start, date_picker_end, is_month = False):

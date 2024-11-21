@@ -2,7 +2,7 @@
 import json
 import pandas as pd
 from datetime import datetime
-from youtube_utils.utils import *
+from youtube_utils.utilities import *
 
 
 def prepare_and_save_data(path_video_statistics_list, path_videos_categories):

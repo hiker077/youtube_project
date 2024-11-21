@@ -1,4 +1,4 @@
-from youtube_utils.api import get_video_list, get_video_statistics, get_video_categories
+from youtube_utils.youtube_api import get_video_list, get_video_statistics, get_video_categories
 from youtube_utils.config import *
 from youtube_utils.data_processing import prepare_and_save_data
 import pandas as pd 
