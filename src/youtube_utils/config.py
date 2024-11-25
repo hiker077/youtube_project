@@ -1,0 +1,13 @@
+#API_KEY = 'AIzaSyDBk-6UYCERAyG3v6KCu_QFomytZvt6kyo' ##ProjectYoutube2
+API_KEY ='AIzaSyANkwKbzmirDS6ffLFi-BxCmBLiLqqG0TY'
+CHANNEL_ID = 'UClhEl4bMD8_escGCCTmRAYg'
+URL_SEARCH = 'https://www.googleapis.com/youtube/v3/search'
+URL_VIDEOS = 'https://www.googleapis.com/youtube/v3/videos'
+URL_VIDEO_CATEGORIES = 'https://www.googleapis.com/youtube/v3/videoCategories'
+MAX_RESULTS = 5
+DOWNLOAD_ITERATION=5
+VIDEO_DURATION_MEDIUM = 'medium'
+VIDEO_DURATION_LONG = 'long'
+PATH_VIDEO_STATISTICS_LIST = 'data/raw_data/video_statistics_list.json'
+PATH_VIDEOS_CATEGORIES = 'data/raw_data/video_categories.json'
+PATH_DASHBOARD_DATA = 'data/dashboard_data/'
