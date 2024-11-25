@@ -4,7 +4,7 @@ import dash_bootstrap_components as dbc
 import pandas as pd
 from datetime import date, datetime, timedelta
 import os 
-from helpers import get_filters_parameters
+from utilities import get_filters_parameters
 YOUTUBE_LOGO ='https://upload.wikimedia.org/wikipedia/commons/b/b8/YouTube_Logo_2017.svg'
 
 # picker_range_start_date

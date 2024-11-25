@@ -6,7 +6,7 @@ from datetime import date, datetime, timedelta
 import os 
 from layout import create_layout
 from callbacks import register_callbacks
-from helpers import load_data
+from utilities import load_data
 
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 EXTERNAL_STYLESHEETS = [dbc.themes.BOOTSTRAP, "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.7.2/font/bootstrap-icons.min.css"]

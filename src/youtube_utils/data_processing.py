@@ -25,7 +25,6 @@ def prepare_and_save_data(path_video_statistics_list, path_videos_categories):
     videos_df['YEAR_MONTH'] = videos_df['publishedAt'].dt.to_period('M')
     videos_df['DAY_OF_WEEK_NAME'] = videos_df['publishedAt'].dt.day_name()
     videos_df['DAY_OF_WEEK_NUMBER'] = videos_df['publishedAt'].dt.day_of_week
-
     videos_df = videos_df.merge(videos_categories, on='categoryId')
     videos_df.columns = videos_df.columns.str.upper()
     
