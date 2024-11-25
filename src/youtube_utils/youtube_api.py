@@ -3,12 +3,12 @@ import requests
 import json
 
 
-def fetch_videos(url, channel_id, api_key, max_results, video_duration, page_token= None):
+def fetch_videos(url, channel_id, api_key, video_duration, published_after, published_before, page_token= None):
     """Can be long or medium
     Test2  asdasd
     TEst 3
     """
-    params = {'part': 'snippet', 'type':'video','videoDuration': video_duration, 'channelId': channel_id, 'key': api_key, 'maxResults': max_results, 'pageToken': page_token}
+    params = {'part': 'snippet','type':'video','videoDuration': video_duration, 'channelId': channel_id, 'key': api_key, 'pageToken': page_token, 'publishedAfter': published_after, 'publishedBefore': published_before}
     response = requests.get(url, params=params)
     response_json = response.json()
     video_ids = [item['id'].get('videoId') for item in response_json.get('items', []) if item['id'].get('videoId')]
@@ -18,7 +18,7 @@ def fetch_videos(url, channel_id, api_key, max_results, video_duration, page_tok
     return video_ids, page_token
 
 
-def get_video_list(url, api_key, maxResults, channel_id, video_duration, dowload_iteration=None):
+def get_video_list(url, api_key, published_after, published_before , channel_id, video_duration, dowload_iteration=None):
     """"
     This function upload entire list of videoID's for defined channel_id. 
     Return the list. 
@@ -40,7 +40,7 @@ def get_video_list(url, api_key, maxResults, channel_id, video_duration, dowload
                     break
                     
                 else:
-                    video_ids, page_token = fetch_videos(url, channel_id, api_key, maxResults, video_duration, page_token)
+                    video_ids, page_token = fetch_videos(url, channel_id, api_key, video_duration ,published_after, published_before,  page_token)
                     # video_ids = [item['id'].get('videoId') for item in response_json.get('items', []) if item['id'].get('videoId')]
                     videos_list.extend(video_ids)
                     video_count = len(videos_list)
@@ -51,7 +51,7 @@ def get_video_list(url, api_key, maxResults, channel_id, video_duration, dowload
                     print('Task fisnished. Page token doesnt exist.')
                     break
                 else: 
-                    video_ids, page_token = fetch_videos(url, channel_id, api_key, maxResults, video_duration, page_token)
+                    video_ids, page_token = fetch_videos(url, channel_id, api_key, video_duration,published_after, published_before, page_token)
                     # video_ids = [item['id'].get('videoId') for item in response_json.get('items', []) if item['id'].get('videoId')]
                     videos_list.extend(video_ids)
                     video_count = len(videos_list)

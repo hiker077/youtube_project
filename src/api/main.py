@@ -9,8 +9,8 @@ def main():
     # set up long or medium
 
     print('1. Dowload of video IDs started.')
-    video_list_long = get_video_list(url =  URL_SEARCH, api_key = API_KEY, maxResults= MAX_RESULTS, channel_id= CHANNEL_ID, video_duration= VIDEO_DURATION_LONG)
-    video_list_medium = get_video_list(url =  URL_SEARCH, api_key = API_KEY, maxResults= MAX_RESULTS, channel_id= CHANNEL_ID, video_duration= VIDEO_DURATION_MEDIUM)
+    video_list_long = get_video_list(url =  URL_SEARCH, api_key = API_KEY, channel_id= CHANNEL_ID,published_after= PUBLISHED_AFTER, published_before = PUBLISHED_BEFORE,  video_duration= VIDEO_DURATION_LONG)
+    video_list_medium = get_video_list(url =  URL_SEARCH, api_key = API_KEY, channel_id= CHANNEL_ID, published_after= PUBLISHED_AFTER, published_before=PUBLISHED_BEFORE, video_duration= VIDEO_DURATION_MEDIUM)
     video_list = video_list_long + video_list_medium
 
     print('2. Saving of video IDs list to started.')
