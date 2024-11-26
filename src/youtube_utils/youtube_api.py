@@ -3,66 +3,61 @@ import requests
 import json
 
 
-def fetch_videos(url, channel_id, api_key, video_duration, published_after, published_before, page_token= None):
-    """Can be long or medium
-    Test2  asdasd
-    TEst 3
-    """
-    params = {'part': 'snippet','type':'video','videoDuration': video_duration, 'channelId': channel_id, 'key': api_key, 'pageToken': page_token, 'publishedAfter': published_after, 'publishedBefore': published_before}
-    response = requests.get(url, params=params)
-    response_json = response.json()
-    video_ids = [item['id'].get('videoId') for item in response_json.get('items', []) if item['id'].get('videoId')]
-    page_token = response_json.get('nextPageToken')
+# def fetch_videos(url, channel_id, api_key, video_duration, published_after, published_before, page_token= None):
+#     """
+#     Funtion fetchs videos IDs for singl request.
+#     """
+#     params = {'part': 'snippet','type':'video','videoDuration': video_duration, 'channelId': channel_id, 'key': api_key, 'pageToken': page_token, 'publishedAfter': published_after, 'publishedBefore': published_before}
+#     response = requests.get(url, params=params)
+#     response_json = response.json()
+#     video_ids = [item['id'].get('videoId') for item in response_json.get('items', []) if item['id'].get('videoId')]
+#     page_token = response_json.get('nextPageToken')
 
 
-    return video_ids, page_token
+#     return video_ids, page_token
 
 
-def get_video_list(url, api_key, published_after, published_before , channel_id, video_duration, dowload_iteration=None):
+def get_video_list(url, channel_id, api_key, video_duration, published_after, published_before, page_token= None, dowload_iteration=None):
     """"
     This function upload entire list of videoID's for defined channel_id. 
     Return the list. 
     """
-    
     videos_list = []
     page_token = None
+    count = 0
 
     try:
-        ##temp litmit of dowloads
-        count = 1
         while True:
-            # if response.status_code != 200:
-            #     raise Exception(f"Error fetching videos: {response.status_code} - {response_json.get('error', {}).get('message')}")
-            ##change to logg later 
-            if dowload_iteration is not None:
-                if count > dowload_iteration or (count>1 and page_token is None):
+            # Check if the download limit is reached or no more pages are available
+            if dowload_iteration is not None and (count > dowload_iteration or (count>0 and page_token is None)):
                     print('Task fisnished. Dowload limit was reached or there is no page_token.')
                     break
-                    
-                else:
-                    video_ids, page_token = fetch_videos(url, channel_id, api_key, video_duration ,published_after, published_before,  page_token)
-                    # video_ids = [item['id'].get('videoId') for item in response_json.get('items', []) if item['id'].get('videoId')]
-                    videos_list.extend(video_ids)
-                    video_count = len(videos_list)
-                    count +=1
-                    print(f'Number of IDs in list {video_count} and page_token {page_token}')
-            else:
-                if count>1 and page_token is None:
+            
+            # Fetch videos and update the list
+            params = {'part': 'snippet','type':'video','videoDuration': video_duration, 'channelId': channel_id, 'key': api_key, 'pageToken': page_token, 'publishedAfter': published_after, 'publishedBefore': published_before}
+            response = requests.get(url, params=params)
+            response_json = response.json()
+            video_ids = [item['id'].get('videoId') for item in response_json.get('items', []) if item['id'].get('videoId')]
+            page_token = response_json.get('nextPageToken')
+            videos_list.extend(video_ids)
+            video_count = len(videos_list)          
+            count +=1
+
+            #Log progress
+            print(f'Number of IDs in list {video_count} and page_token {page_token}')
+
+            #Break if no more pages
+            if page_token is None:
                     print('Task fisnished. Page token doesnt exist.')
                     break
-                else: 
-                    video_ids, page_token = fetch_videos(url, channel_id, api_key, video_duration,published_after, published_before, page_token)
-                    # video_ids = [item['id'].get('videoId') for item in response_json.get('items', []) if item['id'].get('videoId')]
-                    videos_list.extend(video_ids)
-                    video_count = len(videos_list)
-                    count +=1
-                    print(f'Number of IDs in list {video_count} and page_token {page_token}')
 
     except Exception as e:
         print(f"An error occurred: {str(e)}")
         return None
 
     return videos_list
+
+
 
 
 def get_video_statistics(url, channelId, videoList, api_key , part=('snippet', 'contentDetails', 'statistics')):
