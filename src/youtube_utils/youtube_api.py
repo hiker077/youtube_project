@@ -61,53 +61,50 @@ def get_video_list(url, channel_id, api_key, video_duration, published_after, pu
 
 
 def get_video_statistics(url, channelId, videoList, api_key , part=('snippet', 'contentDetails', 'statistics')):
+    """
+    Download of single video statistics.
+    Function returns list of statistics and category set.
+    """
     results = []
     category_list = set()
-    """
-    This function dowload video statistic for each videoID defined on the input list. 
-    """
+ 
     try:
         for index, video_id in enumerate(videoList):
             params = {'part': part, 'id': video_id, 'key': api_key}
             response = requests.get(url, params=params)
-            response_json = response.json()
-            
             
             if response.status_code != 200:
-                raise Exception(f"Error fetching videos: {response.status_code} - {response_json.get('error', {}).get('message')}")
+                response_json = response.json()
+                error_message = response_json.get('error', {}).get('message', 'Unknown error')
+                raise Exception(f"Error fetching videos {video_id} :{response.status_code} - {error_message}")
             
-            if 'items' in response_json:
-                
-                item_snippet = response_json['items'][0]['snippet']
-                item_statistic = response_json['items'][0]['statistics']
-                item_content_etails = response_json['items'][0]['contentDetails']
-                item_id = response_json['items'][0]['id']
-                
-                publishedAt = item_snippet.get('publishedAt')
-                title = item_snippet.get('title')
-                tags = item_snippet.get('tags', [])
-                viewCount = item_statistic.get('viewCount')
-                likeCount = item_statistic.get('likeCount')
-                commentCount = item_statistic.get('commentCount')
-                contentDetails = item_content_etails.get('duration')
-                categoryId = item_snippet.get('categoryId')
+            response_json = response.json()
+            if 'items' not in response_json:
+                print(f"No statistics available for video {video_id}. Skipping.")
+                continue
+            
+            item = response_json['items'][0]
+            snippet = item.get('snippet', {})
+            statistic = item.get('statistics', {})
+            content_details = item.get('contentDetails')
+    
+            results.append({
+                'videoID': item.get('id', ''),
+                'publishedAt': snippet.get('publishedAt'),
+                'title': snippet.get('title'),
+                'tags': snippet.get('tags', []),
+                'viewCount': statistic.get('viewCount'),
+                'likeCount': statistic.get('likeCount'),
+                'commentCount': statistic.get('commentCount'),
+                'contentDetails': content_details.get('duration'),
+                'categoryId': snippet.get('categoryId')
+            })
+            
+            if category_id := snippet.get('categoryId'):
+                category_list.add(category_id)
 
-                results.append({
-                    'videoID': item_id,
-                    'publishedAt': publishedAt,
-                    'title': title,
-                    'tags': tags,
-                    'viewCount': viewCount,
-                    'likeCount': likeCount,
-                    'commentCount': commentCount,
-                    'contentDetails': contentDetails,
-                    'categoryId': categoryId
-                })
-
-                category_list.add(item_snippet['categoryId'])
-                print(f'VideoId: {video_id}. Iteration number: {index}')
-            else:
-                print(f"Error fetching statistics for video {video_id}")
+            print(f'VideoId: {video_id}. Iteration number: {index}')
+       
 
     except Exception as e:
         print("Something went wrong:", e)
@@ -115,27 +112,33 @@ def get_video_statistics(url, channelId, videoList, api_key , part=('snippet', '
 
     return results, category_list
 
-#no needed 
-def get_video_categories(url, list_of_id, api_key):
+def get_video_categories(url, category_ids, api_key):
     """
-    Dowload the dictiorany of YouTube videos's categories. 
-    Return list of dict's. 
+    Fetching the names of Youtube categories based on IDs. 
     """
-    
+
     category_list = []
 
     try:
-        params = {'part': 'snippet', 'id': list_of_id, 'key': api_key}
+        params = {'part': 'snippet', 'id': category_ids, 'key': api_key}
         response = requests.get(url, params=params)
-        response_json = response.json()
 
         if response.status_code != 200:
-                raise Exception(f"Error fetching videos: {response.status_code} - {response_json.get('error', {}).get('message')}")
+            response_json = response.json()
+            error_message = response_json.get('error', {}).get('message', 'Unknown error')
+            raise Exception(f"Error:{response.status_code} - {error_message}")
 
-        if 'items' in response_json:
-            for item in response_json['items']:
-                category_id = item['id']
-                category_title = item['snippet']['title']
+        response_json = response.json()
+        
+        items = response_json.get('items', [])
+        if not items:
+            print("No categories found in the response.")
+            return []
+
+        for item in items:
+            category_id = item.get('id','')
+            category_title = item.get('snippet', {}).get('title', 'Unknown Title')
+            if category_id and category_title:
                 category_list.append({'id': category_id, 'title': category_title})
         else:
             print("Error fetching video categories.")

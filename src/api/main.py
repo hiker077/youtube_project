@@ -28,7 +28,7 @@ def main():
 
     # #Dowload video categories
     print('4. Saving of videos categories list has been started.')
-    video_categories = get_video_categories(url=URL_VIDEO_CATEGORIES, api_key= API_KEY, list_of_id= category_list)
+    video_categories = get_video_categories(url=URL_VIDEO_CATEGORIES, api_key= API_KEY, category_ids= category_list)
     with open('data/raw_data/video_categories.json', 'w') as file:
         json.dump(video_categories, file)
 
