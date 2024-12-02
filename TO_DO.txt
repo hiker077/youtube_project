@@ -1,0 +1,8 @@
+1.1 Osobne pliki: run. py - pobieranie danych
+DONE 1.2. osobny do odpalania dashboardu. 
+DONE - 2. Ogarniecie pliku .env oraz pakiety dotenv
+3. zmiana pliku run. Po zakonczeniu pobierania danych powinnien być zapis do json i odczyt z json. 
+4. Logging package - zbuduj logikę logowania procesów! 
+5. Dodaj w pliku run 5 punkt prepare_and_save_data . Zapis finalnych danych do pliku. dataframe 
+6 .Wyczyść wszystkie linki i stałe z pakietó@ 
+

@@ -110,6 +110,7 @@ def get_video_statistics(url, channelId, videoList, api_key , part=('snippet', '
 
     return results, category_list
 
+
 def get_video_categories(url, category_ids, api_key):
     """
     Fetching the names of Youtube categories based on IDs. 

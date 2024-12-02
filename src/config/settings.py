@@ -1,3 +1,11 @@
+from pathlib import Path
+
+BASE_DIR = Path.cwd() 
+RAW_DATA_DIR = BASE_DIR / 'data' / 'raw_data'
+FILE_VIDEO_LIST = RAW_DATA_DIR / 'video_list.json'
+FILE_VIDEO_STAT_LIST = RAW_DATA_DIR / 'video_statistics_list.json'
+FILE_VIDEO_CATEGORIES = RAW_DATA_DIR / 'video_categories.json'
+
 #API_KEY = 'AIzaSyDBk-6UYCERAyG3v6KCu_QFomytZvt6kyo' ##ProjectYoutube2
 API_KEY ='AIzaSyANkwKbzmirDS6ffLFi-BxCmBLiLqqG0TY'
 CHANNEL_ID = 'UClhEl4bMD8_escGCCTmRAYg'
