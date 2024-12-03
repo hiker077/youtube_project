@@ -8,14 +8,6 @@ from api.main import main
 
 
 
-
-
-# Path dealing
-# https://www.youtube.com/watch?v=UcKkmwaRbsQ&t=363s
-# Dealing with paths 
-# https://medium.com/@ageitgey/python-3-quick-tip-the-easy-way-to-deal-with-file-paths-on-windows-mac-and-linux-11a072b58d5f
-
-
 #     Data_Engineer_Project/
 # │
 # ├── youtube_project/

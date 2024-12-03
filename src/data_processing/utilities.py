@@ -1,9 +1,6 @@
 import re
-##pobierz pobrane dane 
-import json
 import pandas as pd
 from datetime import datetime
-
 
 def get_publishing_period(x):
     ##define date period in which channel published movie
@@ -14,7 +11,6 @@ def get_publishing_period(x):
         return "Afternoon"
     else:
         return "Evening"
-
 
 def get_minutes(x):
     ##function to extact time (in minutes)
@@ -30,10 +26,9 @@ def get_minutes(x):
 
     return minutes
 
-
 def prepare_and_save_data(path_video_statistics_list, path_videos_categories):
     """
-    Funciton return csv file with youtube data which will be used to dashboard prepataion. 
+    Funciton return data frame  with youtube data which will be used to dashboard prepataion. 
     """
 
     videos_df = pd.read_json(path_video_statistics_list)

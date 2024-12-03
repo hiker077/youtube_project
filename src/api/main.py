@@ -1,13 +1,5 @@
-# from youtube_utils.youtube_api import get_video_list, get_video_statistics, get_video_categories
-# from settings import *
-# from youtube_utils.data_processing import prepare_and_save_data
-import pandas as pd 
-
 import requests
 import json
-
-
-TEST=1 
 
 def get_video_list(url, channel_id, api_key, video_duration, published_after, published_before, page_token= None, download_iteration=None):
     """"
@@ -22,15 +14,36 @@ def get_video_list(url, channel_id, api_key, video_duration, published_after, pu
         while True:
             # Check if the download limit is reached or no more pages are available
             if download_iteration is not None and (count >= download_iteration or (count>0 and page_token is None)):
-                    print('Task fisnished. Dowload limit was reached or there is no page_token.')
-                    break
+                print('Task fisnished. Dowload limit was reached or there is no page_token.')
+                break
             
             # Fetch videos and update the list
-            params = {'part': 'snippet','type':'video','videoDuration': video_duration, 'channelId': channel_id, 'key': api_key, 'pageToken': page_token, 'publishedAfter': published_after, 'publishedBefore': published_before}
-            response = requests.get(url, params=params)
-            response_json = response.json()
-            video_ids = [item['id'].get('videoId') for item in response_json.get('items', []) if item['id'].get('videoId')]
-            page_token = response_json.get('nextPageToken')
+            params = {'part': 'snippet',
+                      'type':'video',
+                      'videoDuration': video_duration,
+                      'channelId': channel_id,
+                      'key': api_key,
+                      'pageToken': page_token,
+                      'publishedAfter': published_after,
+                      'publishedBefore': published_before}
+            
+            try:
+                response = requests.get(url, params=params)
+                response.raise_for_status()
+            except requests.exceptions.RequestException as e:
+                print(f"Error during API request: {e}")
+            
+            try:
+                response_json = response.json()
+            except json.JSONDecodeError as e:
+                print(f'Error decoding JSON respone: {e}')
+            
+            try:
+                video_ids = [item['id'].get('videoId') for item in response_json.get('items', []) if item['id'].get('videoId')]
+                page_token = response_json.get('nextPageToken')
+            except (KeyError, AttributeError) as e:
+                print(f"Error extracting data from JSON: {e}")
+
             videos_list.extend(video_ids)
             video_count = len(videos_list)          
             count +=1
@@ -40,14 +53,15 @@ def get_video_list(url, channel_id, api_key, video_duration, published_after, pu
 
             #Break if no more pages
             if page_token is None:
-                    print('Task fisnished. Page token doesnt exist.')
-                    break
+                print('Task fisnished. Page token doesnt exist.')
+                break
 
     except Exception as e:
         print(f"An error occurred: {str(e)}")
-        return None
 
-    return videos_list
+    finally:
+        return videos_list
+    # return videos_list
 
 
 def get_video_statistics(url, channelId, videoList, api_key , part=('snippet', 'contentDetails', 'statistics')):
@@ -131,47 +145,11 @@ def get_video_categories(url, category_ids, api_key):
             category_title = item.get('snippet', {}).get('title', 'Unknown Title')
             if category_id and category_title:
                 category_list.append({'id': category_id, 'title': category_title})
-        else:
-            print("Error fetching video categories.")
 
     except Exception as e:
         print("Something went wrong:", e)
         return None
 
     return category_list
-
-
-
-# def main():
-#     #Download list of videoID's
-#     # set up long or medium
-
-#     print('1. Dowload of video IDs started.')
-#     video_list_long = get_video_list(url =  URL_SEARCH, api_key = API_KEY, channel_id= CHANNEL_ID,published_after= PUBLISHED_AFTER, published_before = PUBLISHED_BEFORE,  video_duration= VIDEO_DURATION_LONG)
-#     video_list_medium = get_video_list(url =  URL_SEARCH, api_key = API_KEY, channel_id= CHANNEL_ID, published_after= PUBLISHED_AFTER, published_before=PUBLISHED_BEFORE, video_duration= VIDEO_DURATION_MEDIUM)
-#     video_list = video_list_long + video_list_medium
-
-#     print('2. Saving of video IDs list to started.')
-#     with open('data/raw_data/video_list.json', 'w') as file:
-#         json.dump(video_list, file)
-
-#     #Dowload video statistics
-#     # Adding less URL_VIDEOS, parallel
-#        #dodaj ścieżki do CONFIG 
-#     print('3. Saving of videos statistics list has been started.')
-#     video_statistics, category_list = get_video_statistics(url = URL_VIDEOS, channelId = CHANNEL_ID, videoList = video_list, api_key=API_KEY)
-#     with open('data/raw_data/video_statistics_list.json', 'w') as file:
-#         json.dump(video_statistics, file)
-    
-
-#     # #Dowload video categories
-#     print('4. Saving of videos categories list has been started.')
-#     video_categories = get_video_categories(url=URL_VIDEO_CATEGORIES, api_key= API_KEY, category_ids= category_list)
-#     with open('data/raw_data/video_categories.json', 'w') as file:
-#         json.dump(video_categories, file)
-
-    # print('5. Saving of dashboard data has been started.')
-    # youtube_data_dashboard = prepare_and_save_data(path_video_statistics_list = PATH_VIDEO_STATISTICS_LIST, path_videos_categories= PATH_VIDEOS_CATEGORIES)
-    # youtube_data_dashboard.to_csv(PATH_DASHBOARD_DATA + 'youtube_data_dashboard.csv')
 
 
