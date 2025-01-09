@@ -14,7 +14,7 @@ EXTERNAL_STYLESHEETS = [
     dbc.themes.BOOTSTRAP,
     "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.7.2/font/bootstrap-icons.min.css",
 ]
-config = dotenv_values(".env")
+config = dotenv_values(".env.share")
 dashboard_data_path = Path(config["DASHBOARD_DATA_FILE"])
 
 # #Download of raw data
