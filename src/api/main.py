@@ -1,5 +1,9 @@
 import requests
 import json
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 def get_video_list(
@@ -20,66 +24,74 @@ def get_video_list(
     page_token = None
     count = 0
 
+    logging.info("Download of video list has been started.")
     try:
-        while True:
-            # Check if the download limit is reached or no more pages are available
-            if download_iteration is not None and (
-                count >= download_iteration or (count > 0 and page_token is None)
-            ):
-                print(
-                    "Task fisnished. Dowload limit was reached or there is no page_token."
+        for video_duration_type in video_duration:
+            logger.info(
+                f"Dowloading of video type: {video_duration_type} has been stared."
+            )
+            while True:
+                # Check if the download limit is reached or no more pages are available
+                if download_iteration is not None and (
+                    count >= download_iteration or (count > 0 and page_token is None)
+                ):
+                    logger.info("Dowload limit was reached or there is no page_token.")
+                    break
+
+                # Fetch videos and update the list
+                params = {
+                    "part": "snippet",
+                    "type": "video",
+                    "videoDuration": video_duration_type,
+                    "channelId": channel_id,
+                    "key": api_key,
+                    "pageToken": page_token,
+                    "publishedAfter": published_after,
+                    "publishedBefore": published_before,
+                }
+
+                try:
+                    response = requests.get(url, params=params)
+                    response.raise_for_status()
+                except requests.exceptions.RequestException as e:
+                    logger.error(f"Error during API request: {e}", exc_info=True)
+
+                try:
+                    response_json = response.json()
+                except json.JSONDecodeError as e:
+                    logger.error(f"Error decoding JSON respone: {e}", exc_info=True)
+
+                try:
+                    video_ids = [
+                        item["id"].get("videoId")
+                        for item in response_json.get("items", [])
+                        if item["id"].get("videoId")
+                    ]
+                    page_token = response_json.get("nextPageToken")
+                except (KeyError, AttributeError) as e:
+                    logger.error(f"Error extracting data from JSON: {e}", exc_info=True)
+
+                videos_list.extend(video_ids)
+                video_count = len(videos_list)
+                count += 1
+
+                # Log progress
+                logger.info(
+                    f"Number of IDs in list {video_count} and page_token {page_token}"
                 )
-                break
-
-            # Fetch videos and update the list
-            params = {
-                "part": "snippet",
-                "type": "video",
-                "videoDuration": video_duration,
-                "channelId": channel_id,
-                "key": api_key,
-                "pageToken": page_token,
-                "publishedAfter": published_after,
-                "publishedBefore": published_before,
-            }
-
-            try:
-                response = requests.get(url, params=params)
-                response.raise_for_status()
-            except requests.exceptions.RequestException as e:
-                print(f"Error during API request: {e}")
-
-            try:
-                response_json = response.json()
-            except json.JSONDecodeError as e:
-                print(f"Error decoding JSON respone: {e}")
-
-            try:
-                video_ids = [
-                    item["id"].get("videoId")
-                    for item in response_json.get("items", [])
-                    if item["id"].get("videoId")
-                ]
-                page_token = response_json.get("nextPageToken")
-            except (KeyError, AttributeError) as e:
-                print(f"Error extracting data from JSON: {e}")
-
-            videos_list.extend(video_ids)
-            video_count = len(videos_list)
-            count += 1
-
-            # Log progress
-            print(f"Number of IDs in list {video_count} and page_token {page_token}")
-
-            # Break if no more pages
-            if page_token is None:
-                print("Task fisnished. Page token doesnt exist.")
-                break
+                # Break if no more pages
+                if page_token is None:
+                    logger.info(
+                        f"Task fisnished. Page token does not exist. Number of dowloaded ID's:{video_count}."
+                    )
+                    count = 0
+                    break
 
     except Exception as e:
-        print(f"An error occurred: {str(e)}")
+        logger.error(f"An error occurred: {str(e)}")
 
     finally:
+        logger.info("Download of video list has been finished.")
         return videos_list
     # return videos_list
 
@@ -94,6 +106,7 @@ def get_video_statistics(
     results = []
     category_list = set()
 
+    logging.info("Dowload of video statistics has been started.")
     try:
         for index, video_id in enumerate(videoList):
             params = {"part": part, "id": video_id, "key": api_key}
@@ -105,12 +118,15 @@ def get_video_statistics(
                     "message", "Unknown error"
                 )
                 raise Exception(
-                    f"Error fetching videos {video_id} :{response.status_code} - {error_message}"
+                    logger.error(
+                        f"Error fetching videos {video_id} :{response.status_code} - {error_message}",
+                        exc_info=True,
+                    )
                 )
 
             response_json = response.json()
             if "items" not in response_json:
-                print(f"No statistics available for video {video_id}. Skipping.")
+                logger.info(f"No statistics available for video {video_id}. Skipping.")
                 continue
 
             item = response_json["items"][0]
@@ -135,12 +151,14 @@ def get_video_statistics(
             if category_id := snippet.get("categoryId"):
                 category_list.add(category_id)
 
-            print(f"VideoId: {video_id}. Iteration number: {index}")
+            logger.info(f"VideoId: {video_id}. Iteration number: {index}")
         category_list = list(category_list)
 
     except Exception as e:
-        print("Something went wrong:", e)
+        logger.error(f"An error occurred: {str(e)}")
         return None
+
+    logging.info("Dowload of video statisticts has been finished.")
 
     return results, category_list
 
@@ -152,6 +170,7 @@ def get_video_categories(url, category_ids, api_key):
 
     category_list = []
 
+    logging.info("Dowload of video categories has been started.")
     try:
         params = {"part": "snippet", "id": category_ids, "key": api_key}
         response = requests.get(url, params=params)
@@ -161,13 +180,17 @@ def get_video_categories(url, category_ids, api_key):
             error_message = response_json.get("error", {}).get(
                 "message", "Unknown error"
             )
-            raise Exception(f"Error:{response.status_code} - {error_message}")
+            raise Exception(
+                logging.error(
+                    f"Error fetching categories: {response.status_code} - {error_message}"
+                )
+            )
 
         response_json = response.json()
 
         items = response_json.get("items", [])
         if not items:
-            print("No categories found in the response.")
+            logging.info("No categories found in the response.")
             return []
 
         for item in items:
@@ -177,7 +200,24 @@ def get_video_categories(url, category_ids, api_key):
                 category_list.append({"id": category_id, "title": category_title})
 
     except Exception as e:
-        print("Something went wrong:", e)
+        logging.error(f"An error occurred: {str(e)}")
         return None
 
+    logging.info("Dowload of video categories has been finished.")
+
     return category_list
+
+
+def save_to_file(data, file_path):
+    """
+    Save data to file in JSON format.
+    """
+    try:
+        logging.info(f"Saving data to file: {file_path}")
+        with open(file_path, "w") as file:
+            json.dump(data, file)
+        logging.info("Data saved correctly.")
+
+    except Exception as e:
+        logger.error(f"An error occurred: {str(e)}")
+        raise

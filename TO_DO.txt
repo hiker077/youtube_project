@@ -7,7 +7,7 @@ DONE 5. Dodaj w pliku run 5 punkt prepare_and_save_data . Zapis finalnych danych
 7. Przygotuj dokumentacje i wszystkie wymagane pliki oraz opisy!
  - requirements.txt
  - add readme file 
-8. Logging package - zbuduj logikę logowania procesów! 
+DONE - 8. Logging package - zbuduj logikę logowania procesów! 
 9. Add: improve .env and .env.share
 
 

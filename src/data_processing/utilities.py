@@ -1,6 +1,11 @@
 import re
 import pandas as pd
 from datetime import datetime
+import logging
+
+
+logger = logging.getLogger(__name__)
+
 
 def get_publishing_period(x):
     ##define date period in which channel published movie
@@ -12,12 +17,13 @@ def get_publishing_period(x):
     else:
         return "Evening"
 
+
 def get_minutes(x):
     ##function to extact time (in minutes)
 
-    hour = re.search(r'(\d{1,2})H', x)
-    minute = re.search(r'(\d{1,2})M', x)
-    second = re.search(r'(\d{1,2})S', x)
+    hour = re.search(r"(\d{1,2})H", x)
+    minute = re.search(r"(\d{1,2})M", x)
+    second = re.search(r"(\d{1,2})S", x)
 
     hour = 0 if hour is None else int(hour.group(1))
     minute = 0 if minute is None else int(minute.group(1))
@@ -26,27 +32,42 @@ def get_minutes(x):
 
     return minutes
 
-def prepare_and_save_data(path_video_statistics_list, path_videos_categories):
+
+def transform_datas(path_video_statistics_list, path_videos_categories):
     """
-    Funciton return data frame  with youtube data which will be used to dashboard prepataion. 
+    Funciton return data frame  with youtube data which will be used to dashboard prepataion.
     """
+    logging.info("Data transformation has been started.")
 
     videos_df = pd.read_json(path_video_statistics_list)
     videos_categories = pd.read_json(path_videos_categories)
-    videos_categories.rename(columns={'id': 'categoryId', 'title': 'category_title'}, inplace=True)
+    videos_categories.rename(
+        columns={"id": "categoryId", "title": "category_title"}, inplace=True
+    )
 
     # change type of objects
-    videos_df[['viewCount', 'likeCount', 'commentCount', 'categoryId']] = videos_df[
-        ['viewCount', 'likeCount', 'commentCount', 'categoryId']].fillna(0).astype('int64')
+    videos_df[["viewCount", "likeCount", "commentCount", "categoryId"]] = (
+        videos_df[["viewCount", "likeCount", "commentCount", "categoryId"]]
+        .fillna(0)
+        .astype("int64")
+    )
 
     ##define new column with minutes of video
-    videos_df['video_time'] = videos_df['contentDetails'].apply(lambda x: get_minutes(x))
-    videos_df['publishedAt'] = videos_df['publishedAt'].apply(lambda x: datetime.strptime(x, "%Y-%m-%dT%H:%M:%SZ"))
-    videos_df['published_period'] = videos_df['publishedAt'].apply(lambda x: get_publishing_period(x))
-    videos_df['YEAR_MONTH'] = videos_df['publishedAt'].dt.to_period('M')
-    videos_df['DAY_OF_WEEK_NAME'] = videos_df['publishedAt'].dt.day_name()
-    videos_df['DAY_OF_WEEK_NUMBER'] = videos_df['publishedAt'].dt.day_of_week
-    videos_df = videos_df.merge(videos_categories, on='categoryId')
+    videos_df["video_time"] = videos_df["contentDetails"].apply(
+        lambda x: get_minutes(x)
+    )
+    videos_df["publishedAt"] = videos_df["publishedAt"].apply(
+        lambda x: datetime.strptime(x, "%Y-%m-%dT%H:%M:%SZ")
+    )
+    videos_df["published_period"] = videos_df["publishedAt"].apply(
+        lambda x: get_publishing_period(x)
+    )
+    videos_df["YEAR_MONTH"] = videos_df["publishedAt"].dt.to_period("M")
+    videos_df["DAY_OF_WEEK_NAME"] = videos_df["publishedAt"].dt.day_name()
+    videos_df["DAY_OF_WEEK_NUMBER"] = videos_df["publishedAt"].dt.day_of_week
+    videos_df = videos_df.merge(videos_categories, on="categoryId")
     videos_df.columns = videos_df.columns.str.upper()
+
+    logging.info("Data transformation has been finished.")
 
     return videos_df
