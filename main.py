@@ -1,42 +1,86 @@
-from youtube_utils.api import get_video_list, get_video_statistics, get_video_categories
-from youtube_utils.config import *
-from youtube_utils.data_processing import prepare_and_save_data
-import pandas as pd 
 import json
+from pathlib import Path
+from dotenv import dotenv_values
+from dash import Dash
+import dash_bootstrap_components as dbc
 
-def main():
-    #Download list of videoID's
-    # set up long or medium
+from src.api.main import get_video_list, get_video_statistics, get_video_categories
+from src.data_processing.utilities import prepare_and_save_data
+from src.dashboard.layout import create_layout
+from src.dashboard.callbacks import register_callbacks
+from src.dashboard.utilities import load_data
 
-    print('1. Dowload of video IDs started.')
-    video_list_long = get_video_list(url =  URL_SEARCH, api_key = API_KEY, maxResults= MAX_RESULTS, channel_id= CHANNEL_ID, video_duration= VIDEO_DURATION_LONG)
-    video_list_medium = get_video_list(url =  URL_SEARCH, api_key = API_KEY, maxResults= MAX_RESULTS, channel_id= CHANNEL_ID, video_duration= VIDEO_DURATION_MEDIUM)
-    video_list = video_list_long + video_list_medium
+EXTERNAL_STYLESHEETS = [
+    dbc.themes.BOOTSTRAP,
+    "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.7.2/font/bootstrap-icons.min.css",
+]
 
-    print('2. Saving of video IDs list to started.')
-    with open('data/raw_data/video_list.json', 'w') as file:
-        json.dump(video_list, file)
+config = dotenv_values(".env")
+config_share = dotenv_values(".env.share")
 
-    #Dowload video statistics
-    # Adding less URL_VIDEOS, parallel
-       #dodaj ścieżki do CONFIG 
-    print('3. Saving of videos statistics list has been started.')
-    video_statistics, category_list = get_video_statistics(url = URL_VIDEOS, channelId = CHANNEL_ID, videoList = video_list, api_key=API_KEY)
-    with open('data/raw_data/video_statistics_list.json', 'w') as file:
-        json.dump(video_statistics, file)
-    
+dashboard_data_path = Path(config_share["DASHBOARD_DATA_FILE"])
 
-    # #Dowload video categories
-    print('4. Saving of videos categories list has been started.')
-    video_categories = get_video_categories(url=URL_VIDEO_CATEGORIES, api_key= API_KEY, list_of_id= category_list)
-    with open('data/raw_data/video_categories.json', 'w') as file:
-        json.dump(video_categories, file)
 
-    print('5. Saving of dashboard data has been started.')
-    youtube_data_dashboard = prepare_and_save_data(path_video_statistics_list =PATH_VIDEO_STATISTICS_LIST, path_videos_categories= PATH_VIDEOS_CATEGORIES)
-    youtube_data_dashboard.to_csv(PATH_DASHBOARD_DATA + 'youtube_data_dashboard.csv')
-    
+# Download of raw data
+print("1. Dowload of video IDs started.")
+video_list_long = get_video_list(
+    url=config_share["URL_SEARCH"],
+    api_key=config["API_KEY"],
+    channel_id=config["CHANNEL_ID"],
+    published_after=config_share["PUBLISHED_AFTER"],
+    published_before=config_share["PUBLISHED_BEFORE"],
+    video_duration=config_share["VIDEO_DURATION_LONG"],
+)
+video_list_medium = get_video_list(
+    url=config_share["URL_SEARCH"],
+    api_key=config["API_KEY"],
+    channel_id=config["CHANNEL_ID"],
+    published_after=config_share["PUBLISHED_AFTER"],
+    published_before=config_share["PUBLISHED_BEFORE"],
+    video_duration=config_share["VIDEO_DURATION_MEDIUM"],
+)
+video_list = video_list_long + video_list_medium
+with open(config_share["FILE_VIDEO_LIST"], "w") as file:
+    json.dump(video_list, file)
 
-    
-if __name__ == "__main__":
-    main()
+print("3. Saving of videos statistics list has been started.")
+video_statistics, category_list = get_video_statistics(
+    url=config_share["URL_VIDEOS"],
+    channelId=config["CHANNEL_ID"],
+    videoList=video_list,
+    api_key=config["API_KEY"],
+)
+with open(config_share["PATH_VIDEO_STATISTICS_LIST"], "w") as file:
+    json.dump(video_statistics, file)
+
+print("4. Saving of videos categories list has been started.")
+video_categories = get_video_categories(
+    url=config_share["URL_VIDEO_CATEGORIES"],
+    api_key=config["API_KEY"],
+    category_ids=category_list,
+)
+with open(config_share["PATH_VIDEOS_CATEGORIES"], "w") as file:
+    json.dump(video_categories, file)
+
+# Data preparation
+data = prepare_and_save_data(
+    config_share["PATH_VIDEO_STATISTICS_LIST"], config_share["PATH_VIDEOS_CATEGORIES"]
+)
+data.to_csv(config_share["DASHBOARD_DATA_FILE"])
+
+# Run of dashboard
+if dashboard_data_path.exists():
+    data = load_data(dashboard_data_path)
+else:
+    raise ValueError(
+        f"File with necessary data does not exist: {dashboard_data_path.name}"
+    )
+
+
+# app = Dash(__name__, external_stylesheets=EXTERNAL_STYLESHEETS)
+# app.title = "YouTube Dashboard"
+# app.layout = create_layout(data, config["YOUTUBE_LOGO"])
+
+# register_callbacks(app)
+# if __name__ == "__main__":
+#     app.run_server(debug=True)
