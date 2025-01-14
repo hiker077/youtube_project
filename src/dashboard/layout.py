@@ -1,34 +1,10 @@
 from dash import (
-    Dash,
     html,
     dcc,
-    callback,
-    Output,
-    Input,
-    ctx,
     dash_table,
-    MATCH,
-    ALL,
-    State,
-    no_update,
 )
-import plotly.express as px
 import dash_bootstrap_components as dbc
-import pandas as pd
-from datetime import date, datetime, timedelta
-import os
 from dashboard.utilities import get_filters_parameters
-
-YOUTUBE_LOGO = (
-    "https://upload.wikimedia.org/wikipedia/commons/b/b8/YouTube_Logo_2017.svg"
-)
-
-# picker_range_start_date
-# picker_range_end_date
-# range_sider_video_time_min
-# range_sider_video_time_max
-# drop_down_category
-# LOGO
 
 
 def create_layout(data, youtube_logo):
@@ -56,8 +32,8 @@ def create_layout(data, youtube_logo):
                             id="date-picker-range",
                             month_format="DD/MM/YYYY",
                             end_date_placeholder_text="DD/MM/YYYY",
-                            start_date=picker_range_start_date,  # pd.to_datetime(df['PUBLISHEDAT']).dt.date.min(),
-                            end_date=picker_range_end_date,  #  pd.to_datetime(df['PUBLISHEDAT']).dt.date.max()
+                            start_date=picker_range_start_date,
+                            end_date=picker_range_end_date,
                         ),
                     ],
                     className="mb-3",
@@ -66,9 +42,8 @@ def create_layout(data, youtube_logo):
                     [
                         html.H6("Duration of video (minutes)"),
                         dcc.RangeSlider(
-                            min=range_sider_video_time_min,  # df['VIDEO_TIME'].min(),
-                            max=range_sider_video_time_max,  # df['VIDEO_TIME'].max(),
-                            # step=1,
+                            min=range_sider_video_time_min,
+                            max=range_sider_video_time_max,
                             tooltip={"placement": "bottom", "always_visible": True},
                             allowCross=False,
                             marks=None,
@@ -76,7 +51,7 @@ def create_layout(data, youtube_logo):
                             value=[
                                 range_sider_video_time_min,
                                 range_sider_video_time_max,
-                            ],  # [df['VIDEO_TIME'].min(), df['VIDEO_TIME'].max()],
+                            ],
                         ),
                     ],
                     className="mb-3",
@@ -85,8 +60,8 @@ def create_layout(data, youtube_logo):
                     [
                         html.H6("Categories"),
                         dcc.Dropdown(
-                            options=drop_down_category,  # df['CATEGORY_TITLE'].unique(),
-                            value=drop_down_category,  # df['CATEGORY_TITLE'].unique(),
+                            options=drop_down_category,
+                            value=drop_down_category,
                             multi=True,
                             id="dropdown-filter",
                         ),
@@ -100,7 +75,6 @@ def create_layout(data, youtube_logo):
 
     BODY = dbc.Container(
         [
-            ##Filter
             dbc.Row(
                 [
                     dbc.Col(
@@ -129,7 +103,6 @@ def create_layout(data, youtube_logo):
                                                         "Number of videos",
                                                         className="card-title text-muted",
                                                     ),
-                                                    # html.H2("$10,499.93", className="card-text fw-bold"),
                                                     dbc.Row(
                                                         [
                                                             dbc.Col(
@@ -137,15 +110,15 @@ def create_layout(data, youtube_logo):
                                                                     className="bi-camera-video"
                                                                 ),
                                                                 style={"color": "red"},
-                                                            ),  # Icon column
+                                                            ),
                                                             dbc.Col(
                                                                 html.H2(
                                                                     id="number-of-videos",
                                                                     className="card-text fw-bold",
                                                                 )
-                                                            ),  # Number column
+                                                            ),
                                                         ],
-                                                        className="align-items-center",  # Vertically align icon and number
+                                                        className="align-items-center",
                                                     ),
                                                 ]
                                             ),
@@ -170,15 +143,15 @@ def create_layout(data, youtube_logo):
                                                                         "color": "red"
                                                                     },
                                                                 )
-                                                            ),  # Icon column
+                                                            ),
                                                             dbc.Col(
                                                                 html.H2(
                                                                     id="avg-number-of-views",
                                                                     className="card-text fw-bold",
                                                                 )
-                                                            ),  # Number column
+                                                            ),
                                                         ],
-                                                        className="align-items-center",  # Vertically align icon and number
+                                                        className="align-items-center",
                                                     ),
                                                 ]
                                             ),
@@ -201,15 +174,15 @@ def create_layout(data, youtube_logo):
                                                                     className="bi bi-chat-left-text-fill"
                                                                 ),
                                                                 style={"color": "red"},
-                                                            ),  # Icon column
+                                                            ),
                                                             dbc.Col(
                                                                 html.H2(
                                                                     id="avg-number-of-comments",
                                                                     className="card-text fw-bold",
                                                                 )
-                                                            ),  # Number column
+                                                            ),
                                                         ],
-                                                        className="align-items-center",  # Vertically align icon and number
+                                                        className="align-items-center",
                                                     ),
                                                 ]
                                             ),
@@ -234,7 +207,7 @@ def create_layout(data, youtube_logo):
                                                                         "color": "red"
                                                                     },
                                                                 )
-                                                            ),  # Icon column
+                                                            ),
                                                             dbc.Col(
                                                                 html.H2(
                                                                     id="avg-number-of-likes",
@@ -242,7 +215,7 @@ def create_layout(data, youtube_logo):
                                                                 )
                                                             ),
                                                         ],
-                                                        className="align-items-center",  # Vertically align icon and number
+                                                        className="align-items-center",
                                                     ),
                                                 ]
                                             ),
@@ -291,7 +264,7 @@ def create_layout(data, youtube_logo):
                                     html.Div(
                                         dash_table.DataTable(
                                             id="table-data",
-                                            columns=[  # {'name': 'TITLE', 'id': 'TITLE', 'presentation': 'markdown'},
+                                            columns=[
                                                 {
                                                     "name": "Video title",
                                                     "id": "TITLE",
@@ -315,7 +288,6 @@ def create_layout(data, youtube_logo):
                                                     "name": "Week day publishing",
                                                     "id": "DAY_OF_WEEK_NAME",
                                                 },
-                                                # {'name': i, 'id': i} for i in ['VIEWCOUNT', 'LIKECOUNT', 'COMMENTCOUNT', 'PUBLISHED_PERIOD', 'DAY_OF_WEEK_NAME', 'CATEGORY_TITLE']
                                             ],
                                             page_size=50,
                                             filter_action="native",
@@ -331,7 +303,6 @@ def create_layout(data, youtube_logo):
                                                     "direction": "desc",
                                                 }
                                             ],
-                                            # fixed_rows={'headers': True, 'data':0}
                                         )
                                     ),
                                     className="justify-content-center my-2",

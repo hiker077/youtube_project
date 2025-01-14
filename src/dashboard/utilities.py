@@ -1,15 +1,8 @@
 import plotly.express as px
-import dash_bootstrap_components as dbc
 import pandas as pd
-from datetime import date, datetime, timedelta
-import os
-
-# YOUTUBE_LOGO ='https://upload.wikimedia.org/wikipedia/commons/b/b8/YouTube_Logo_2017.svg'
-# EXTERNAL_STYLESHEETS = [dbc.themes.BOOTSTRAP, "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.7.2/font/bootstrap-icons.min.css"]
-# BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+from datetime import datetime
 
 
-# Load and process data s
 def load_data(filepath: str) -> pd.DataFrame:
     df = pd.read_csv(filepath)
     df["TITLE"] = [
@@ -21,7 +14,6 @@ def load_data(filepath: str) -> pd.DataFrame:
     return df
 
 
-# Helper functions
 def data_filter(
     dff,
     chart1_state,
