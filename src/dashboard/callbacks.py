@@ -1,6 +1,9 @@
-from dash import Output, Input, ctx, State
+from dash import Output, Input, ctx, State, no_update
 import pandas as pd
 from dashboard.utilities import data_filter, build_charts, kpis
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def register_callbacks(app_name):
@@ -73,31 +76,53 @@ def register_callbacks(app_name):
         triggered_id = ctx.triggered_id
 
         # Step 1: Process master data
-        dff = pd.DataFrame(master_data)
-        dff, state_data = data_filter(
-            dff,
-            chart1_state,
-            chart3_state,
-            chart4_state,
-            triggered_id,
-            slider_filter_state,
-            dropdown_filter_state,
-            state_data,
-            date_start,
-            date_end,
-            True,
-        )
+        try:
+            dff = pd.DataFrame(master_data)
+        except ValueError as e:
+            logger.error(f"Error converting master_data to DataFrame: {e}")
+            return tuple([no_update] * 10)
+
+        try:
+            dff, state_data = data_filter(
+                dff,
+                chart1_state,
+                chart3_state,
+                chart4_state,
+                triggered_id,
+                slider_filter_state,
+                dropdown_filter_state,
+                state_data,
+                date_start,
+                date_end,
+                True,
+            )
+        except Exception as e:
+            logger.error(f"Error filtering data: {e}")
+            return tuple([no_update] * 10)
 
         # Step 2: Build charts based on the processed data
-        figg1, figg2, figg3, figg4 = build_charts(dff)
+        try:
+            figg1, figg2, figg3, figg4 = build_charts(dff)
+        except Exception as e:
+            logger.error(f"Error building charts: {e}")
+            figg1, figg2, figg3, figg4 = no_update, no_update, no_update, no_update
 
         # Step 3: Calculate key performance indicators (KPIs)
-        (
-            number_of_videos,
-            avg_number_of_views,
-            avg_number_of_comments,
-            avg_number_of_likes,
-        ) = kpis(dff)
+        try:
+            (
+                number_of_videos,
+                avg_number_of_views,
+                avg_number_of_comments,
+                avg_number_of_likes,
+            ) = kpis(dff)
+        except Exception as e:
+            logger.error(f"Error calculating KPIs: {e}")
+            (
+                number_of_videos,
+                avg_number_of_views,
+                avg_number_of_comments,
+                avg_number_of_likes,
+            ) = (no_update, no_update, no_update, no_update)
         # Step 4: Prepare data for the table
         table_data = dff.to_dict("records")
 
