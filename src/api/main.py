@@ -1,107 +1,94 @@
 import requests
 import json
 import logging
-
+from typing import List, Dict, Tuple, Union, Optional
 
 logger = logging.getLogger(__name__)
 
 
+def fetch_response(url: str, params: Dict) -> Optional[Dict]:
+    """
+    Helper function to handle API requests and parse JSON responses.
+    """
+    try:
+        response = requests.get(url, params=params)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error during API request: {e}", exc_info=True)
+    except json.JSONDecodeError as e:
+        logger.error(f"Error decoding JSON response: {e}", exc_info=True)
+    return None
+
+
 def get_video_list(
-    url,
-    channel_id,
-    api_key,
-    video_duration,
-    published_after,
-    published_before,
-    page_token=None,
-    download_iteration=None,
-):
+    url: str,
+    channel_id: str,
+    api_key: str,
+    video_duration: List[str],
+    published_after: str,
+    published_before: str,
+    page_token: Optional[str] = None,
+    download_limit: Optional[int] = None,
+) -> List[str]:
     """ "
-    This function upload entire list of videoID's for defined channel_id.
-    Return the list.
+    Fetches a list of video IDs for a given channel.
     """
     videos_list = []
-    page_token = None
     count = 0
 
     logging.info("Download of video list has been started.")
-    try:
-        for video_duration_type in video_duration:
+    # try:
+    for video_duration_type in video_duration:
+        logger.info(f"Processing video type: {video_duration_type}.")
+        while True:
+            # if download_limit is not None and (
+            #     count >= download_limit or (count > 0 and page_token is None)
+            # ):
+            if download_limit and count >= download_limit:
+                logger.info("Dowload limit reach.")
+                return videos_list
+
+            params = {
+                "part": "snippet",
+                "type": "video",
+                "videoDuration": video_duration_type,
+                "channelId": channel_id,
+                "key": api_key,
+                "pageToken": page_token,
+                "publishedAfter": published_after,
+                "publishedBefore": published_before,
+            }
+
+            response_json = fetch_response(url, params)
+            if response_json is None:
+                break
+
+            video_ids = [
+                item["id"].get("videoId")
+                for item in response_json.get("items", [])
+                if item["id"].get("videoId")
+            ]
+            videos_list.extend(video_ids)
+            page_token = response_json.get("nextPageToken")
+            count += 1
+
             logger.info(
-                f"Dowloading of video type: {video_duration_type} has been stared."
+                f"Downloaded {len(videos_list)} videos. Page_token {page_token}"
             )
-            while True:
-                # Check if the download limit is reached or no more pages are available
-                if download_iteration is not None and (
-                    count >= download_iteration or (count > 0 and page_token is None)
-                ):
-                    logger.info("Dowload limit was reached or there is no page_token.")
-                    break
 
-                # Fetch videos and update the list
-                params = {
-                    "part": "snippet",
-                    "type": "video",
-                    "videoDuration": video_duration_type,
-                    "channelId": channel_id,
-                    "key": api_key,
-                    "pageToken": page_token,
-                    "publishedAfter": published_after,
-                    "publishedBefore": published_before,
-                }
+            if not page_token:
+                break
 
-                try:
-                    response = requests.get(url, params=params)
-                    response.raise_for_status()
-                except requests.exceptions.RequestException as e:
-                    logger.error(f"Error during API request: {e}", exc_info=True)
-
-                try:
-                    response_json = response.json()
-                except json.JSONDecodeError as e:
-                    logger.error(f"Error decoding JSON respone: {e}", exc_info=True)
-
-                try:
-                    video_ids = [
-                        item["id"].get("videoId")
-                        for item in response_json.get("items", [])
-                        if item["id"].get("videoId")
-                    ]
-                    page_token = response_json.get("nextPageToken")
-                except (KeyError, AttributeError) as e:
-                    logger.error(f"Error extracting data from JSON: {e}", exc_info=True)
-
-                videos_list.extend(video_ids)
-                video_count = len(videos_list)
-                count += 1
-
-                # Log progress
-                logger.info(
-                    f"Number of IDs in list {video_count} and page_token {page_token}"
-                )
-                # Break if no more pages
-                if page_token is None:
-                    logger.info(
-                        f"Task fisnished. Page token does not exist. Number of dowloaded ID's:{video_count}."
-                    )
-                    count = 0
-                    break
-
-    except Exception as e:
-        logger.error(f"An error occurred: {str(e)}")
-
-    finally:
-        logger.info("Download of video list has been finished.")
-        return videos_list
-    # return videos_list
+    logger.info("Completed download of video list.")
+    return videos_list
 
 
 def get_video_statistics(
     url, channelId, videoList, api_key, part=("snippet", "contentDetails", "statistics")
 ):
     """
-    Download of single video statistics.
-    Function returns list of statistics and category set.
+    Fetch video statistics for a list of video IDs.
     """
     results = []
     category_list = set()

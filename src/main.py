@@ -45,7 +45,7 @@ def data_initialization():
         published_after=config_share["PUBLISHED_AFTER"],
         published_before=config_share["PUBLISHED_BEFORE"],
         page_token=None,
-        download_iteration=1,
+        download_limit=1,
     )
 
     output_file = Path(config_share["FILE_VIDEO_LIST"])
