@@ -85,8 +85,12 @@ def get_video_list(
 
 
 def get_video_statistics(
-    url, channelId, videoList, api_key, part=("snippet", "contentDetails", "statistics")
-):
+    url: str,
+    channelId: str,
+    videoList: List[str],
+    api_key: str,
+    part: Tuple[str, ...] = ("snippet", "contentDetails", "statistics"),
+) -> Tuple[List[Dict], List[str]]:
     """
     Fetch video statistics for a list of video IDs.
     """
@@ -94,60 +98,51 @@ def get_video_statistics(
     category_list = set()
 
     logging.info("Dowload of video statistics has been started.")
-    try:
-        for index, video_id in enumerate(videoList):
-            params = {"part": part, "id": video_id, "key": api_key}
-            response = requests.get(url, params=params)
+    for video_id in videoList:
+        params = {"part": part, "id": video_id, "key": api_key}
 
-            if response.status_code != 200:
-                response_json = response.json()
-                error_message = response_json.get("error", {}).get(
-                    "message", "Unknown error"
-                )
-                raise Exception(
-                    logger.error(
-                        f"Error fetching videos {video_id} :{response.status_code} - {error_message}",
-                        exc_info=True,
-                    )
-                )
+        # response = requests.get(url, params=params)
+        response_json = fetch_response(url, params)
+        # if response.status_code != 200:
+        #     response_json = response.json()
+        #     error_message = response_json.get("error", {}).get(
+        #         "message", "Unknown error"
+        #     )
+        #     raise Exception(
+        #         logger.error(
+        #             f"Error fetching videos {video_id} :{response.status_code} - {error_message}",
+        #             exc_info=True,
+        #         )
+        #     )
 
-            response_json = response.json()
-            if "items" not in response_json:
-                logger.info(f"No statistics available for video {video_id}. Skipping.")
-                continue
+        # response_json = response.json()
+        if not response_json or "items" not in response_json:
+            continue
 
-            item = response_json["items"][0]
-            snippet = item.get("snippet", {})
-            statistic = item.get("statistics", {})
-            content_details = item.get("contentDetails")
+        item = response_json["items"][0]
+        snippet = item.get("snippet", {})
+        statistic = item.get("statistics", {})
+        content_details = item.get("contentDetails")
 
-            results.append(
-                {
-                    "videoID": item.get("id", ""),
-                    "publishedAt": snippet.get("publishedAt"),
-                    "title": snippet.get("title"),
-                    "tags": snippet.get("tags", []),
-                    "viewCount": statistic.get("viewCount"),
-                    "likeCount": statistic.get("likeCount"),
-                    "commentCount": statistic.get("commentCount"),
-                    "contentDetails": content_details.get("duration"),
-                    "categoryId": snippet.get("categoryId"),
-                }
-            )
+        results.append(
+            {
+                "videoID": item.get("id", ""),
+                "publishedAt": snippet.get("publishedAt"),
+                "title": snippet.get("title"),
+                "tags": snippet.get("tags", []),
+                "viewCount": statistic.get("viewCount"),
+                "likeCount": statistic.get("likeCount"),
+                "commentCount": statistic.get("commentCount"),
+                "contentDetails": content_details.get("duration"),
+                "categoryId": snippet.get("categoryId"),
+            }
+        )
 
-            if category_id := snippet.get("categoryId"):
-                category_list.add(category_id)
+        if category_id := snippet.get("categoryId"):
+            category_list.add(category_id)
 
-            logger.info(f"VideoId: {video_id}. Iteration number: {index}")
-        category_list = list(category_list)
-
-    except Exception as e:
-        logger.error(f"An error occurred: {str(e)}")
-        return None
-
-    logging.info("Dowload of video statisticts has been finished.")
-
-    return results, category_list
+    logging.info("Completed download of video statisticts.")
+    return results, list(category_list)
 
 
 def get_video_categories(url, category_ids, api_key):
