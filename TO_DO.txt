@@ -4,11 +4,9 @@ DONE - 2. Ogarniecie pliku .env oraz pakiety dotenv
 DONE 3. zmiana pliku run. Po zakonczeniu pobierania danych powinnien być zapis do json i odczyt z json. 
 DONE 5. Dodaj w pliku run 5 punkt prepare_and_save_data . Zapis finalnych danych do pliku. dataframe 
 6 .Wyczyść wszystkie linki i stałe z pakietó@ 
-7. Przygotuj dokumentacje i wszystkie wymagane pliki oraz opisy!
- - requirements.txt
- - add readme file 
+DONE 7. Przygotuj dokumentacje i wszystkie wymagane pliki oraz opisy!
 DONE - 8. Logging package - zbuduj logikę logowania procesów! 
-9. Add: improve .env and .env.share
+DONE 9. Add: improve .env and .env.share
 
 
 

@@ -1,4 +1,4 @@
-# Dashboard Project
+# YouTube Dashboard Project
 
 ## Overview
 This project provides a robust data visualization dashboard for analyzing YouTube channel statistics. It integrates data processing, a user-friendly interactive dashboard built with Dash and Plotly, and a structured backend architecture to handle the required computations and transformations.
@@ -130,19 +130,3 @@ Logs are stored in the `logs/project.log` file. Logging configurations can be cu
 For questions or support, please contact me at [arkadiusz.kostrzewa92@gmail.com].
 
 ---
-
-
-
-
-
-Youtube API: 
-
-Information about quotas: 
-
-Calculating quota usage
-Google calculates your quota usage by assigning a cost to each request. Different types of operations have different quota costs. For example:
-
-A read operation that retrieves a list of resources -- channels, videos, playlists -- usually costs 1 unit.
-A write operation that creates, updates, or deletes a resource usually has costs 50 units.
-A search request costs 100 units.
-A video upload costs 1600 units.
