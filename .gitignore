@@ -2,5 +2,5 @@ youtube_utils/config.py
 tem.ipynb
 .env
 src/logs/*
-data/data_processed/*
-data/raw_data/*
+data/data_processed/
+data/raw_data/
