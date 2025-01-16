@@ -61,7 +61,7 @@ def data_initialization():
         published_after=config["PUBLISHED_AFTER"],
         published_before=config["PUBLISHED_BEFORE"],
         page_token=None,
-        download_limit=1,
+        # download_limit=1,
     )
     save_to_file(video_list, Path(config["FILE_VIDEO_LIST"]))
 
