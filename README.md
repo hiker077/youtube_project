@@ -46,7 +46,6 @@ This project provides a robust data visualization dashboard for analyzing YouTub
 ├── .env                       # Environment variables.
 ├── .env.share                 # Environment variables for sharing.
 ├── .gitignore                 # Git ignore file.
-├── main.py                    # Entry point for running the dashboard.
 ├── README.md                  # Project documentation.
 └── requirements.txt           # Python dependencies.
 ```
@@ -132,17 +131,6 @@ For questions or support, please contact me at [arkadiusz.kostrzewa92@gmail.com]
 
 ---
 
-
-
-
-
-
-
-
-
-
-To do: 
-1) define in .env following env:  API_KEY CHANNEL_ID
 
 
 
