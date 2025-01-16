@@ -1,6 +1,8 @@
 from dash import Output, Input, ctx, State, no_update
 import pandas as pd
-from dashboard.utilities import data_filter, build_charts, kpis
+
+# from dashboard.utilities import data_filter, build_charts, kpis
+from dashboard.utilities_new import filter_data, calculate_kpis, generate_charts
 import logging
 
 logger = logging.getLogger(__name__)
@@ -83,7 +85,7 @@ def register_callbacks(app_name):
             return tuple([no_update] * 10)
 
         try:
-            dff, state_data = data_filter(
+            dff, state_data = filter_data(
                 dff,
                 chart1_state,
                 chart3_state,
@@ -94,7 +96,6 @@ def register_callbacks(app_name):
                 state_data,
                 date_start,
                 date_end,
-                True,
             )
         except Exception as e:
             logger.error(f"Error filtering data: {e}")
@@ -102,7 +103,7 @@ def register_callbacks(app_name):
 
         # Step 2: Build charts based on the processed data
         try:
-            figg1, figg2, figg3, figg4 = build_charts(dff)
+            figg1, figg2, figg3, figg4 = generate_charts(dff)
         except Exception as e:
             logger.error(f"Error building charts: {e}")
             figg1, figg2, figg3, figg4 = no_update, no_update, no_update, no_update
@@ -114,7 +115,7 @@ def register_callbacks(app_name):
                 avg_number_of_views,
                 avg_number_of_comments,
                 avg_number_of_likes,
-            ) = kpis(dff)
+            ) = calculate_kpis(dff)
         except Exception as e:
             logger.error(f"Error calculating KPIs: {e}")
             (

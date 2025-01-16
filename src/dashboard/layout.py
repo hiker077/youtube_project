@@ -1,7 +1,8 @@
 from dash import html, dcc, dash_table
 import dash_bootstrap_components as dbc
-from dashboard.utilities import get_filters_parameters
 
+# from dashboard.utilities import get_filters_parameters
+from dashboard.utilities_new import extract_filter_parameters
 
 # Constants
 SHADOW_CLASS = "shadow-sm"
@@ -26,7 +27,7 @@ def create_filter_card(data):
         range_slider_min,
         range_slider_max,
         dropdown_options,
-    ) = get_filters_parameters(data)
+    ) = extract_filter_parameters(data)
 
     return dbc.Card(
         dbc.CardBody(
