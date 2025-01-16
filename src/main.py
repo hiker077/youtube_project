@@ -14,7 +14,7 @@ from api.main import (
 )
 from data_processing.utilities import transform_datas
 
-from dashboard.utilities_new import load_data
+from dashboard.utilities import load_data
 from dashboard.layout import create_layout
 from dashboard.callbacks import register_callbacks
 
