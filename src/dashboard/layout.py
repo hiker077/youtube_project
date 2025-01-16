@@ -1,8 +1,6 @@
 from dash import html, dcc, dash_table
 import dash_bootstrap_components as dbc
-
-# from dashboard.utilities import get_filters_parameters
-from dashboard.utilities_new import extract_filter_parameters
+from dashboard.utilities import extract_filter_parameters
 
 # Constants
 SHADOW_CLASS = "shadow-sm"

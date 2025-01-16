@@ -1,8 +1,6 @@
 from dash import Output, Input, ctx, State, no_update
 import pandas as pd
-
-# from dashboard.utilities import data_filter, build_charts, kpis
-from dashboard.utilities_new import filter_data, calculate_kpis, generate_charts
+from dashboard.utilities import filter_data, calculate_kpis, generate_charts
 import logging
 
 logger = logging.getLogger(__name__)
