@@ -39,10 +39,10 @@ This project provides a robust data visualization dashboard for analyzing YouTub
 │   ├── data_processing        # Data transformation and preprocessing.
 │   │   ├── __init__.py
 │   │   └── utilities.py       # Data cleaning and filtering logic.
-│
-├── logs                       # Stores application logs.
-│   └── project.log
-│
+│   │
+│   ├── logs                       # Stores application logs.
+│   │   └── project.log
+│   └── main.py
 ├── .env                       # Environment variables.
 ├── .env.share                 # Environment variables for sharing.
 ├── .gitignore                 # Git ignore file.
@@ -86,7 +86,7 @@ This project provides a robust data visualization dashboard for analyzing YouTub
 
 5. **Run the Application**:
    ```bash
-   python main.py
+   python src/main.py
    ```
 
 6. **Access the Dashboard**:
@@ -121,7 +121,6 @@ Logs are stored in the `logs/project.log` file. Logging configurations can be cu
 ---
 
 ## Future Enhancements
-- Add authentication and user roles.
 - Improve responsiveness for mobile devices.
 - Integrate additional APIs for enriched insights.
 - Enable export of filtered data.
