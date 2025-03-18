@@ -1,20 +1,31 @@
 # YouTube Dashboard Project
 
-## Overview
+## 📋 Overview
 This project provides a robust data visualization dashboard for analyzing YouTube channel statistics. It integrates data processing, a user-friendly interactive dashboard built with Dash and Plotly, and a structured backend architecture to handle the required computations and transformations.
 
 ![Screenshot dashboardu](assets/Screenshot_1.png)
+
+![Screenshot dashboardu](assets/Screenshot_2.png)
 ---
 
-## Features
-- **Data Processing**: Cleans and prepares raw YouTube data for visualization.
-- **Interactive Dashboard**: Filters, charts, and tables for intuitive exploration of video statistics.
+## 🌟 Features
+- **Automated Data Retrieval**: Fetches data using the Google API.
+- **Data Processing**: Cleans and transforms raw YouTube data for streamlined use in visualizations.
+- **Interactive Dashboard**: Provides dynamic charts, filters and tables for intuitive exploration of video statistics.
 - **KPI Metrics**: Displays key performance indicators such as average views, likes, and comments.
 - **Customizable Filters**: Allows users to slice data based on date, category, and video duration.
-
 ---
 
-## Project Structure
+## 🔧 Technology
+
+- Python 3.8+
+- Dash
+- Pandas
+- Plotly
+- Requests (to API)
+
+
+## 🔍 Project Structure
 ```
 .
 ├── data
