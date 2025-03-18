@@ -12,7 +12,7 @@ This project provides a robust data visualization dashboard for analyzing YouTub
 
 ## 🎬 Demo
 
-![Link to video](assets/Video.mp4)
+[Link to video](assets/Video.mp4)
 --- 
 
 ## 🌟 Features
