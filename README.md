@@ -3,6 +3,7 @@
 ## Overview
 This project provides a robust data visualization dashboard for analyzing YouTube channel statistics. It integrates data processing, a user-friendly interactive dashboard built with Dash and Plotly, and a structured backend architecture to handle the required computations and transformations.
 
+![Screenshot dashboardu](assets/Screenshot_1.png)
 ---
 
 ## Features
